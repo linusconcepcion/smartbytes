@@ -80,7 +80,7 @@ export class Game {
                 }
             }
 
-            lastgen = newgen;
+            lastgen = this.top_half(newgen);
             this.set_mating_pct(lastgen);
 
             generation++;
@@ -89,6 +89,16 @@ export class Game {
 
     private sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+
+    private top_half(generation: Array<Snake>) {
+        var sorted = generation.sort(function(a,b) { return b.score - a.score });
+        var strong: Snake[] = [];
+
+        for (var i=0; i<generation.length/2; i++)
+            strong.push(generation[i]);
+        
+        return strong;
     }
 
     private set_mating_pct(generation: Array<Snake>) {

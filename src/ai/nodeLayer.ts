@@ -1,9 +1,12 @@
+import { Brain } from "./brain";
+
 export class NodeLayer {
 
     public prior_layer: NodeLayer;
     public node_count: number;
 
-    private weights = new Array<Array<number>>();
+    private brain: Brain;
+    private start_index: number;
     public values = new Array<number>();
 
     constructor(priorLayer: NodeLayer, nodeCount: number) {
@@ -13,6 +16,12 @@ export class NodeLayer {
         this.values = new Array<number>(nodeCount);
     }
 
+    public set_weights(brain: Brain, startpos: number) {
+        this.brain = brain;
+        this.start_index = startpos;
+    }
+
+/*
     public cross_over(mom: NodeLayer, pop: NodeLayer) {
         this.weights = [];
         for (var i=0; i<this.node_count; i++) {
@@ -47,10 +56,7 @@ export class NodeLayer {
             this.weights.push(nodeweights);
         }
     }
-
-    public saveWeights() {
-        return JSON.stringify(this.weights);
-    }
+*/
 
     public setInputs(inputs: number[]) {
         if (this.prior_layer != null)
@@ -70,7 +76,7 @@ export class NodeLayer {
         for (var i=0; i<this.node_count; i++) {
             var total = 0.0;
             for (var n=0; n<this.prior_layer.node_count; n++) {
-                total += this.weights[i][n] * this.prior_layer.values[n];
+                total += this.brain.get_connecting_weight(this.start_index, this.node_count, i, n) * this.prior_layer.values[n];
             }
 
             this.values[i] = this.rectifiedLinearUnits(total);

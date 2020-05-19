@@ -74,7 +74,7 @@ export class Game {
                         document.querySelector("#best_score").textContent = bestscore.toString();
                     }
                 }
-                lastgen = newgen;
+                lastgen = this.top_half(newgen);
                 this.set_mating_pct(lastgen);
                 generation++;
             }
@@ -82,6 +82,13 @@ export class Game {
     }
     sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
+    }
+    top_half(generation) {
+        var sorted = generation.sort(function (a, b) { return b.score - a.score; });
+        var strong = [];
+        for (var i = 0; i < generation.length / 2; i++)
+            strong.push(generation[i]);
+        return strong;
     }
     set_mating_pct(generation) {
         var total = 0.0;

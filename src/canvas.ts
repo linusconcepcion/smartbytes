@@ -2,8 +2,8 @@ import { Position } from './position.js'
 
 export abstract class Canvas {
 
-    public static MAP_WIDTH: number = 20;
-    public static MAP_HEIGHT: number = 20;
+    public static MAP_WIDTH: number = 15;
+    public static MAP_HEIGHT: number = 15;
     public static DIAGONAL: number = Math.min(Canvas.MAP_WIDTH, Canvas.MAP_HEIGHT);
 
     private static TILE_WIDTH: number = 20;
