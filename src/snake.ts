@@ -70,7 +70,8 @@ export class Snake implements IDrawable
     private visited: Array<Array<boolean>>;
 
     public think() {
-        var dir = this.brain.process();
+        var hunger = (Snake.max_moves_to_eat - this.eat_countdown) / Snake.max_moves_to_eat;
+        var dir = this.brain.process(hunger);
 
         if (this.is_reverse(dir, this.head.direction))
             return this.head.direction;  // can't turn on a dime.
@@ -184,7 +185,7 @@ export class Snake implements IDrawable
         }
 
         //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * this.steps), 1.3));
-        this.score = (Math.pow(2, this.apples) * 500) + (cellsvisited * 250) + this.steps;
+        this.score = (Math.pow(2, this.apples) * 5000) + (cellsvisited * 5) + this.steps;
         return this.score;
     }
 

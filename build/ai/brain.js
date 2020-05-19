@@ -4,7 +4,7 @@ import { Canvas } from '../canvas.js';
 export class Brain {
     constructor(game) {
         this.game = game;
-        var inputs = new NodeLayer(null, 32);
+        var inputs = new NodeLayer(null, 33);
         var hidden1 = new NodeLayer(inputs, 20);
         var hidden2 = new NodeLayer(hidden1, 12);
         var output = new NodeLayer(hidden2, 4);
@@ -58,7 +58,7 @@ export class Brain {
             this.weights[i] = (Math.random() * 2) - 1;
         }
     }
-    process() {
+    process(hunger) {
         var headpos = this.snake.head.position;
         var applepos = this.game.apple.position;
         var inputs = [];
@@ -80,6 +80,7 @@ export class Brain {
         inputs.push(tdir[1]);
         inputs.push(tdir[2]);
         inputs.push(tdir[3]);
+        inputs.push(hunger);
         this.layers[0].setInputs(inputs);
         for (var i = 1; i < this.layers.length; i++)
             this.layers[i].calculateNodes();
