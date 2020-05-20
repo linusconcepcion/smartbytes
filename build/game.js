@@ -47,7 +47,7 @@ let Game = /** @class */ (() => {
                 let body = document.querySelector("body");
                 body.onkeyup = this.on_key_up.bind(this);
                 var lastgen = null;
-                while (generation < 1000) {
+                while (generation < 10000) {
                     document.querySelector("#generation_num").textContent = generation.toString();
                     var bestlength = 0;
                     var bestscore = 0;
@@ -56,7 +56,13 @@ let Game = /** @class */ (() => {
                         document.querySelector("#snake_num").textContent = (i + 1).toString() + " of " + snakeCount.toString();
                         var newsnake = null;
                         var spawnrandom = Math.floor(Math.random() * 10) == 1; // 10% of snakes will be random spawns
-                        if (lastgen == null || spawnrandom) {
+                        var smarty = Math.floor(Math.random() * 50) == 1;
+                        if (lastgen == null && smarty) {
+                            var brain = new Brain(this);
+                            brain.spawn_smarty();
+                            newsnake = this.create_snake(brain);
+                        }
+                        else if (lastgen == null || spawnrandom) {
                             var brain = new Brain(this);
                             brain.randomize();
                             newsnake = this.create_snake(brain);
@@ -74,6 +80,11 @@ let Game = /** @class */ (() => {
                         if (score > bestscore) {
                             bestscore = score;
                             document.querySelector("#best_score").textContent = bestscore.toString();
+                        }
+                        if (this.best_snake == null || score > this.best_snake.score) {
+                            this.best_snake = newsnake;
+                            document.querySelector("#best_overall_score").textContent = newsnake.length.toString();
+                            document.querySelector("#best_weights").value = JSON.stringify(newsnake.brain.weights);
                         }
                     }
                     lastgen = this.top_half(newgen);
@@ -185,7 +196,7 @@ let Game = /** @class */ (() => {
             this.has_moved = true;
         }
     }
-    Game.appleCount = 3;
+    Game.appleCount = 1;
     return Game;
 })();
 export { Game };

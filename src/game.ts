@@ -8,13 +8,15 @@ import { Brain } from "./ai/brain.js";
 
 export class Game {
 
-    private static appleCount: number = 3;
+    private static appleCount: number = 1;
     public apples: Apple[];
 
     private speed: Speed = Speed.NORMAL;
     private snake: Snake;
     private clock: Clock;
     private has_moved: boolean = false;
+
+    private best_snake: Snake;
 
     public init() {
         Canvas.init(<HTMLCanvasElement>document.querySelector("canvas"));
@@ -43,7 +45,7 @@ export class Game {
         body.onkeyup = this.on_key_up.bind(this);
         
         var lastgen: Array<Snake> = null;
-        while (generation < 1000) {
+        while (generation < 10000) {
             document.querySelector("#generation_num").textContent = generation.toString();
 
             var bestlength = 0;
@@ -55,8 +57,16 @@ export class Game {
 
                 var newsnake: Snake = null;
                 var spawnrandom = Math.floor(Math.random() * 10) == 1;  // 10% of snakes will be random spawns
+                var smarty = Math.floor(Math.random() * 50) == 1;
 
-                if (lastgen==null || spawnrandom) {
+                if (lastgen==null && smarty) {
+
+                    var brain = new Brain(this);
+                    brain.spawn_smarty();
+
+                    newsnake = this.create_snake(brain);
+                } 
+                else if (lastgen==null || spawnrandom) {
                     var brain = new Brain(this);
                     brain.randomize();
 
@@ -80,6 +90,12 @@ export class Game {
                 if (score>bestscore) {
                     bestscore = score;
                     document.querySelector("#best_score").textContent = bestscore.toString();
+                }
+
+                if (this.best_snake==null || score>this.best_snake.score) {
+                    this.best_snake = newsnake;
+                    document.querySelector("#best_overall_score").textContent = newsnake.length.toString();
+                    (<HTMLInputElement>document.querySelector("#best_weights")).value = JSON.stringify(newsnake.brain.weights);
                 }
             }
 

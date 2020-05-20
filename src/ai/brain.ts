@@ -4,13 +4,14 @@ import { NodeLayer } from './nodeLayer.js'
 import { Position } from '../position.js';
 import { Direction } from '../enum.js';
 import { Canvas } from '../canvas.js';
+import { Smarties } from './saves.js';
 
 export class Brain {
 
     private snake: Snake;
     private game: Game;
     private layers: NodeLayer[];
-    private weights: number[];
+    public weights: number[];
 
     constructor(game: Game) {
         this.game = game;
@@ -48,6 +49,14 @@ export class Brain {
         this.snake = snake;
     }
 
+    public spawn_smarty() {
+        var rnd = Math.floor(Math.random() * Smarties.smart_snakes.length);
+        for (var i=0; i<this.weights.length; i++)
+            this.weights[i] = Smarties.smart_snakes[rnd][i];
+
+        this.mutate();
+    }
+
     public cross_over(mom: Brain, pop: Brain) {
         var splicecount = 5;
         var splicepoints = [];
@@ -66,6 +75,13 @@ export class Brain {
                 else
                     source = mom;
             }
+        }
+
+        this.mutate();
+    }
+
+    private mutate() {
+        for (var i=0; i<this.weights.length; i++) {
             var shouldMutate = (Math.floor(Math.random() * 100))==1;
             if (shouldMutate) {
                 this.weights[i] = (Math.random() * 2)-1;
