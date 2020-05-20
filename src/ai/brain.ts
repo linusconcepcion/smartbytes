@@ -57,6 +57,15 @@ export class Brain {
         this.mutate();
     }
 
+    public clone(parent: Brain) {
+        
+        for (var i=0; i<this.weights.length; i++) {
+            this.weights[i] = parent.weights[i];
+        }
+
+        this.mutate();
+    }
+
     public cross_over(mom: Brain, pop: Brain) {
         var splicecount = 5;
         var splicepoints = [];
@@ -80,6 +89,13 @@ export class Brain {
         this.mutate();
     }
 
+    public randomize() {
+        for (var i in this.weights) {
+            this.weights[i] = (Math.random() * 2)-1;
+        }
+    }
+
+
     private mutate() {
         for (var i=0; i<this.weights.length; i++) {
             var shouldMutate = (Math.floor(Math.random() * 100))==1;
@@ -89,12 +105,6 @@ export class Brain {
         }
     }
 
-    public randomize() {
-        for (var i in this.weights) {
-            this.weights[i] = (Math.random() * 2)-1;
-        }
-    }
- 
     public process(hunger: number) {
         var headpos = this.snake.head.position;
         var inputs = [];

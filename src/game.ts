@@ -55,26 +55,7 @@ export class Game {
             for (var i=0; i<snakeCount; i++) {
                 document.querySelector("#snake_num").textContent = (i+1).toString() + " of " + snakeCount.toString();
 
-                var newsnake: Snake = null;
-                var spawnrandom = Math.floor(Math.random() * 10) == 1;  // 10% of snakes will be random spawns
-                var smarty = Math.floor(Math.random() * 50) == 1;
-
-                if (lastgen==null && smarty) {
-
-                    var brain = new Brain(this);
-                    brain.spawn_smarty();
-
-                    newsnake = this.create_snake(brain);
-                } 
-                else if (lastgen==null || spawnrandom) {
-                    var brain = new Brain(this);
-                    brain.randomize();
-
-                    newsnake = this.create_snake(brain);
-                }
-                else
-                    newsnake = this.spawn_from(lastgen);
-
+                var newsnake = this.spawn_snake(lastgen);
                 newgen.push(newsnake);
 
                 await this.play_game(newsnake);
@@ -106,6 +87,24 @@ export class Game {
         }
     }
 
+    private spawn_snake(lastgen: Array<Snake>) {
+        var spawnrandom = Math.floor(Math.random() * 10) == 1;  // 10% of snakes will be random spawns
+        var smarty = Math.floor(Math.random() * 50) == 1;
+
+        var brain = new Brain(this);
+        if (lastgen==null && smarty) {
+            brain.spawn_smarty();
+        } 
+        else if (lastgen==null || spawnrandom) {
+            brain.randomize();
+        }
+        else {
+            this.spawn_from(brain, lastgen);
+        }
+
+        return new Snake(this, Math.floor(Canvas.MAP_WIDTH/2)+1, Math.floor(Canvas.MAP_HEIGHT/2), 4, Direction.RIGHT, "#e3691c", brain);        
+    }
+
     private sleep(ms) {
         return new Promise(resolve => setTimeout(resolve, ms));
     }
@@ -129,11 +128,18 @@ export class Game {
             snake.mating_pct = (snake.score / total) * 100;
     }
 
-    private spawn_from(generation: Array<Snake>) {
+    private spawn_from(brain: Brain, generation: Array<Snake>) {
         var mom = this.natural_selection(generation);
-        var pop = this.natural_selection(generation);
         
-        return this.mate(mom, pop);        
+        var shouldmate = Math.floor(Math.random() * 2) == 1;
+        if (shouldmate) {
+            var pop = this.natural_selection(generation);
+
+            brain.cross_over(mom.brain, pop.brain);
+        }
+        else {
+            brain.clone(mom.brain);
+        }
     }
 
     private natural_selection(generation: Array<Snake>) {
@@ -145,19 +151,6 @@ export class Game {
                 return snake;
         }
         return generation[generation.length-1];  // just return the last snake
-    }
-
-    private mate(mom: Snake, pop: Snake) {
-
-        // splice the bytes between mom and pop
-        var newbrain = new Brain(this);
-        newbrain.cross_over(mom.brain, pop.brain);
-
-        return this.create_snake(newbrain);
-    }
-
-    private create_snake(brain: Brain) {
-        return new Snake(this, Math.floor(Canvas.MAP_WIDTH/2)+1, Math.floor(Canvas.MAP_HEIGHT/2), 4, Direction.RIGHT, "#e3691c", brain);        
     }
 
     private async play_game(newsnake: Snake) {
@@ -176,11 +169,12 @@ export class Game {
 
             var ms = 30;
             if (this.speed==Speed.FAST)
-                ms = 1;
+                ms = 0;
             else if (this.speed==Speed.SLOW)
                 ms = 50;
 
-            await this.sleep(ms);
+            if (ms>0)
+                await this.sleep(ms);
         }
     }
 
