@@ -6,8 +6,8 @@ export abstract class Canvas {
     public static MAP_HEIGHT: number = 15;
     public static DIAGONAL: number = Math.min(Canvas.MAP_WIDTH, Canvas.MAP_HEIGHT);
 
-    private static TILE_WIDTH: number = 20;
-    private static TILE_HEIGHT: number = 20;
+    private static TILE_WIDTH: number = 16;
+    private static TILE_HEIGHT: number = 16;
     private static width: number = Canvas.MAP_WIDTH * Canvas.TILE_WIDTH;
     private static height: number = Canvas.MAP_HEIGHT * Canvas.TILE_HEIGHT;
     private static context: CanvasRenderingContext2D;

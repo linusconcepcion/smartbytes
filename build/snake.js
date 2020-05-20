@@ -141,8 +141,10 @@ let Snake = /** @class */ (() => {
                         cellsvisited++;
                 }
             }
+            this.score = cellsvisited + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * cellsvisited), 1.3));
             //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * this.steps), 1.3));
-            this.score = (Math.pow(2, this.apples) * 5000) + (cellsvisited * 5) + this.steps;
+            //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) + (cellsvisited * 10);
+            //this.score = (Math.pow(2, this.apples) * 5000) + (cellsvisited * 5) + this.steps;
             return this.score;
         }
         draw() {

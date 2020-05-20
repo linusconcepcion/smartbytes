@@ -49,7 +49,7 @@ export class Brain {
     }
 
     public cross_over(mom: Brain, pop: Brain) {
-        var splicecount = 3;
+        var splicecount = 5;
         var splicepoints = [];
         while (splicepoints.length<splicecount) {
             var point = Math.floor((Math.random() * this.weights.length-1))+1;
@@ -66,7 +66,7 @@ export class Brain {
                 else
                     source = mom;
             }
-            var shouldMutate = (Math.floor(Math.random() * 20))==1;
+            var shouldMutate = (Math.floor(Math.random() * 100))==1;
             if (shouldMutate) {
                 this.weights[i] = (Math.random() * 2)-1;
             }
@@ -81,13 +81,12 @@ export class Brain {
  
     public process(hunger: number) {
         var headpos = this.snake.head.position;
-        var applepos = this.game.apple.position;
         var inputs = [];
         
         var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]; 
         for (var d in directions) {
             var direction = directions[d];
-            var scan = this.scan_direction(headpos, applepos, direction[0], direction[1]);
+            var scan = this.scan_direction(headpos, direction[0], direction[1]);
             inputs.push(scan[0]);
             inputs.push(scan[1]);
             inputs.push(scan[2]);
@@ -107,16 +106,16 @@ export class Brain {
 
         inputs.push(hunger); 
 
-        this.layers[0].setInputs(inputs);
+        this.layers[0].set_inputs(inputs);
 
         for (var i=1; i<this.layers.length; i++)
-            this.layers[i].calculateNodes();
+            this.layers[i].calculate_nodes();
 
         var outputs = this.layers[this.layers.length-1];
         
         // find the max among the outputs
         var curdir: Direction = Direction.UP;
-        var curmax = outputs.values[0];;
+        var curmax = outputs.values[0];
 
         if (outputs.values[1]>curmax) {
             curmax = outputs.values[1];
@@ -133,7 +132,7 @@ export class Brain {
         return curdir;
     }
 
-    private scan_direction(head: Position, apple: Position, dx: number, dy: number) {
+    private scan_direction(head: Position, dx: number, dy: number) {
         var result = [0, 0, 0];  // snake, apple, wall
 
         var x = head.X;
@@ -157,7 +156,7 @@ export class Brain {
             if (result[0]==0 && this.snake.is_on_tile_xy(x, y))
                 result[0] = (max-count) / max;
             
-            else if (result[1]==0 && apple.X==x && apple.Y==y)
+            else if (result[1]==0 && this.game.is_apple_on_tile_xy(x, y)!=-1)
                 result[1] = (max-count) / max;
         }
         result[2] = (max-count) / max;

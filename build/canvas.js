@@ -44,8 +44,8 @@ let Canvas = /** @class */ (() => {
     Canvas.MAP_WIDTH = 15;
     Canvas.MAP_HEIGHT = 15;
     Canvas.DIAGONAL = Math.min(Canvas.MAP_WIDTH, Canvas.MAP_HEIGHT);
-    Canvas.TILE_WIDTH = 20;
-    Canvas.TILE_HEIGHT = 20;
+    Canvas.TILE_WIDTH = 16;
+    Canvas.TILE_HEIGHT = 16;
     Canvas.width = Canvas.MAP_WIDTH * Canvas.TILE_WIDTH;
     Canvas.height = Canvas.MAP_HEIGHT * Canvas.TILE_HEIGHT;
     return Canvas;

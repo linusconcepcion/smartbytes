@@ -8,16 +8,18 @@ import { Brain } from "./ai/brain.js";
 
 export class Game {
 
+    private static appleCount: number = 3;
+    public apples: Apple[];
+
     private speed: Speed = Speed.NORMAL;
     private snake: Snake;
-    public apple: Apple;
     private clock: Clock;
     private has_moved: boolean = false;
 
     public init() {
         Canvas.init(<HTMLCanvasElement>document.querySelector("canvas"));
 
-        this.start_training(200);
+        this.start_training(100);
     }
 
     private on_key_up(ev: KeyboardEvent) {
@@ -52,8 +54,9 @@ export class Game {
                 document.querySelector("#snake_num").textContent = (i+1).toString() + " of " + snakeCount.toString();
 
                 var newsnake: Snake = null;
+                var spawnrandom = Math.floor(Math.random() * 10) == 1;  // 10% of snakes will be random spawns
 
-                if (lastgen==null) {
+                if (lastgen==null || spawnrandom) {
                     var brain = new Brain(this);
                     brain.randomize();
 
@@ -143,7 +146,10 @@ export class Game {
 
     private async play_game(newsnake: Snake) {
         this.snake = newsnake;
-        this.spawn_apple();
+        this.apples = [];
+
+        for (var i=0; i<Game.appleCount; i++)
+            this.spawn_apple();
 
         while (!newsnake.is_dead) {
             if (this.speed!=Speed.PAUSED)
@@ -168,11 +174,24 @@ export class Game {
             var y = Math.round((Math.random() * (Canvas.MAP_HEIGHT-1))) + 1;
 
             var trypos = new Position(x,y);
-            if (!this.snake.is_on_tile(trypos)) {
-                this.apple = new Apple(trypos);
+            if (!this.snake.is_on_tile(trypos) && this.is_apple_on_tile(trypos)==-1) {
+                this.apples.push(new Apple(trypos));
                 break;
             }
         }
+    }
+
+    private is_apple_on_tile(pos: Position) {
+        return this.is_apple_on_tile_xy(pos.X, pos.Y);
+    }
+
+    public is_apple_on_tile_xy(x: number, y: number) {
+        for (var i=0; i<this.apples.length; i++) {
+            if (this.apples[i].position.X == x && this.apples[i].position.Y == y) {
+                return i;
+            }
+        }
+        return -1;
     }
 
     private do_move(direction: Direction) {
@@ -183,16 +202,17 @@ export class Game {
             return;
         }
 
-        if (this.apple!=null) {
-            if (this.snake.head.position.equals(this.apple.position)) {
-                this.snake.eat();
-                this.spawn_apple();
-            }
+        var appleindex = this.is_apple_on_tile(this.snake.head.position);
+        if (appleindex != -1) {
+            this.apples.splice(appleindex, 1);  // remove one item
+            this.snake.eat();
+
+            this.spawn_apple(); // add a new apple
         }
 
         Canvas.clear();
-        if (this.apple!=null)
-            this.apple.draw();
+        for (var apple of this.apples)
+            apple.draw();
 
         this.snake.draw();
 

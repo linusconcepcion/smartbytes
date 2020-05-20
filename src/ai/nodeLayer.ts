@@ -58,7 +58,7 @@ export class NodeLayer {
     }
 */
 
-    public setInputs(inputs: number[]) {
+    public set_inputs(inputs: number[]) {
         if (this.prior_layer != null)
             throw "setInputs is only valid for input layer.";
 
@@ -69,24 +69,29 @@ export class NodeLayer {
             this.values[i] = inputs[i];
     }
 
-    public calculateNodes() {
+    public calculate_nodes() {
         if (this.prior_layer == null)
             return;
 
         for (var i=0; i<this.node_count; i++) {
             var total = 0.0;
             for (var n=0; n<this.prior_layer.node_count; n++) {
-                total += this.brain.get_connecting_weight(this.start_index, this.node_count, i, n) * this.prior_layer.values[n];
+                total += this.brain.get_connecting_weight(this.start_index, this.prior_layer.node_count, i, n) * this.prior_layer.values[n];
             }
 
-            this.values[i] = this.rectifiedLinearUnits(total);
+            this.values[i] = this.rectified_linear_units(total);
         }
     }
 
-    private rectifiedLinearUnits(total: number) {
+    private rectified_linear_units(total: number) {
         if (total<0.0)
             return 0.0;
 
         return total;
+    }
+
+    private sigmoid(total: number) {
+        var sig = 1/(1+Math.pow(Math.E, -total));
+        return sig;
     }
 }
