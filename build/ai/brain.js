@@ -113,7 +113,6 @@ export class Brain {
             max = Canvas.MAP_HEIGHT;
         else
             max = Canvas.DIAGONAL;
-        var max = 1;
         while (x > 0 && y > 0 && x <= Canvas.MAP_WIDTH && y <= Canvas.MAP_HEIGHT) {
             x = x + dx;
             y = y + dy;
