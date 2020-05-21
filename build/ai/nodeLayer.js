@@ -9,42 +9,6 @@ export class NodeLayer {
         this.brain = brain;
         this.start_index = startpos;
     }
-    /*
-        public cross_over(mom: NodeLayer, pop: NodeLayer) {
-            this.weights = [];
-            for (var i=0; i<this.node_count; i++) {
-    
-                this.weights[i] = [];
-                for (var n=0; n<this.prior_layer.node_count; n++) {
-                    var choice = Math.floor(Math.random() * 2);
-                    if (choice==0)
-                        this.weights[i][n] = mom.weights[i][n];
-                    else
-                        this.weights[i][n] = pop.weights[i][n];
-    
-                    var shouldMutate = (Math.floor(Math.random() * 15))==1;
-                    if (shouldMutate) {
-                        this.weights[i][n] = (Math.random() * 2)-1;
-                        //this.weights[i][n] = this.weights[i][n] * (Math.random() * 0.5);
-                    }
-                }
-            }
-        }
-    
-        public randomize() {
-            if (this.prior_layer==null)
-                return;
-    
-            for (var i=0; i<this.node_count; i++) {
-                var nodeweights: number[] = [];
-                for (var n=0; n<this.prior_layer.node_count; n++) {
-                    nodeweights.push((Math.random() * 2)-1);
-                }
-    
-                this.weights.push(nodeweights);
-            }
-        }
-    */
     set_inputs(inputs) {
         if (this.prior_layer != null)
             throw "setInputs is only valid for input layer.";

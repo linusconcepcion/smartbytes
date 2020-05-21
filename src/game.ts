@@ -169,7 +169,7 @@ export class Game {
 
             var ms = 30;
             if (this.speed==Speed.FAST)
-                ms = 0;
+                ms = 1;
             else if (this.speed==Speed.SLOW)
                 ms = 50;
 

@@ -37,6 +37,12 @@ export class Brain {
             this.weights[i] = Smarties.smart_snakes[rnd][i];
         this.mutate();
     }
+    clone(parent) {
+        for (var i = 0; i < this.weights.length; i++) {
+            this.weights[i] = parent.weights[i];
+        }
+        this.mutate();
+    }
     cross_over(mom, pop) {
         var splicecount = 5;
         var splicepoints = [];
@@ -57,17 +63,17 @@ export class Brain {
         }
         this.mutate();
     }
+    randomize() {
+        for (var i in this.weights) {
+            this.weights[i] = (Math.random() * 2) - 1;
+        }
+    }
     mutate() {
         for (var i = 0; i < this.weights.length; i++) {
             var shouldMutate = (Math.floor(Math.random() * 100)) == 1;
             if (shouldMutate) {
                 this.weights[i] = (Math.random() * 2) - 1;
             }
-        }
-    }
-    randomize() {
-        for (var i in this.weights) {
-            this.weights[i] = (Math.random() * 2) - 1;
         }
     }
     process(hunger) {
