@@ -16,9 +16,9 @@ export class Brain {
     constructor(game: Game) {
         this.game = game;
 
-        var inputs = new NodeLayer(null, 33);
-        var hidden1 = new NodeLayer(inputs, 20);
-        var hidden2 = new NodeLayer(hidden1, 12);
+        var inputs = new NodeLayer(null, 24);
+        var hidden1 = new NodeLayer(inputs, 18);
+        var hidden2 = new NodeLayer(hidden1, 18);
         var output = new NodeLayer(hidden2, 4);
 
         this.layers = [inputs, hidden1, hidden2, output];
@@ -39,7 +39,7 @@ export class Brain {
             
             layer.set_weights(this, this.weights.length);
             for (var n=0; n<layer.node_count; n++) {
-                for (var i=0; i<layer.prior_layer.node_count; i++)
+                for (var i=0; i<layer.prior_layer.real_node_count; i++)
                     this.weights.push(0);
             }
         }
@@ -98,7 +98,7 @@ export class Brain {
 
     private mutate() {
         for (var i=0; i<this.weights.length; i++) {
-            var shouldMutate = (Math.floor(Math.random() * 100))==1;
+            var shouldMutate = (Math.floor(Math.random() * 20))==1;
             if (shouldMutate) {
                 this.weights[i] = (Math.random() * 2)-1;
             }
@@ -113,12 +113,14 @@ export class Brain {
         for (var d in directions) {
             var direction = directions[d];
             var scan = this.scan_direction(headpos, direction[0], direction[1]);
+            //inputs.push(scan);
+
             inputs.push(scan[0]);
             inputs.push(scan[1]);
             inputs.push(scan[2]);
         }
 
-        var hdir = this.direction_to_input(this.snake.head.direction);
+        /*var hdir = this.direction_to_input(this.snake.head.direction);
         inputs.push(hdir[0]);
         inputs.push(hdir[1]);
         inputs.push(hdir[2]);
@@ -130,7 +132,7 @@ export class Brain {
         inputs.push(tdir[2]);
         inputs.push(tdir[3]);
 
-        inputs.push(hunger); 
+        inputs.push(hunger); */
 
         this.layers[0].set_inputs(inputs);
 
@@ -179,15 +181,48 @@ export class Brain {
             count++;
 
             if (result[0]==0 && this.snake.is_on_tile_xy(x, y))
-                result[0] = (max-count) / max;
+                result[0] = 1;
             
             else if (result[1]==0 && this.game.is_apple_on_tile_xy(x, y)!=-1)
-                result[1] = (max-count) / max;
+                result[1] = 1;
         }
-        result[2] = (max-count) / max;
+        result[2] = 1/(count+1);
 
         return result;
     }
+
+    private scan_direction2(head: Position, dx: number, dy: number) {
+        var result = [0, 0, 0];  // snake, apple, wall
+
+        var x = head.X;
+        var y = head.Y;
+        var count = 0;
+
+        var max = 0;
+        if (dy==0)
+            max = Canvas.MAP_WIDTH;
+        else if (dx==0)
+            max = Canvas.MAP_HEIGHT;
+        else
+            max = Canvas.DIAGONAL; 
+
+        var signal = 0.0;
+        while (x>0 && y>0 && x<=Canvas.MAP_WIDTH && y<=Canvas.MAP_HEIGHT) {
+            x = x + dx;
+            y = y + dy;
+            count++;
+
+            signal = (max-(count-1)) / max;
+
+            if (result[0]==0 && this.snake.is_on_tile_xy(x, y))
+                return -signal;
+            
+            else if (result[1]==0 && this.game.is_apple_on_tile_xy(x, y)!=-1)
+                return signal;
+        }
+        return -signal;
+    }
+
 
     private direction_to_input(direction: Direction) {
         switch (direction) {

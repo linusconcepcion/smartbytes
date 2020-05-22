@@ -21,7 +21,7 @@ let Game = /** @class */ (() => {
         }
         init() {
             Canvas.init(document.querySelector("canvas"));
-            this.start_training(100);
+            this.start_training(2000);
         }
         on_key_up(ev) {
             console.log(ev.keyCode);
@@ -81,7 +81,7 @@ let Game = /** @class */ (() => {
         }
         spawn_snake(lastgen) {
             var spawnrandom = Math.floor(Math.random() * 10) == 1; // 10% of snakes will be random spawns
-            var smarty = Math.floor(Math.random() * 50) == 1;
+            var smarty = false; //Math.floor(Math.random() * 25) == 1;
             var brain = new Brain(this);
             if (lastgen == null && smarty) {
                 brain.spawn_smarty();
@@ -147,7 +147,7 @@ let Game = /** @class */ (() => {
                     if (this.speed == Speed.FAST)
                         ms = 1;
                     else if (this.speed == Speed.SLOW)
-                        ms = 50;
+                        ms = 65;
                     if (ms > 0)
                         yield this.sleep(ms);
                 }
@@ -195,7 +195,7 @@ let Game = /** @class */ (() => {
             this.has_moved = true;
         }
     }
-    Game.appleCount = 1;
+    Game.appleCount = 8;
     return Game;
 })();
 export { Game };

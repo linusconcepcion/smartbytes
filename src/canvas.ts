@@ -2,8 +2,8 @@ import { Position } from './position.js'
 
 export abstract class Canvas {
 
-    public static MAP_WIDTH: number = 15;
-    public static MAP_HEIGHT: number = 15;
+    public static MAP_WIDTH: number = 40;
+    public static MAP_HEIGHT: number = 40;
     public static DIAGONAL: number = Math.min(Canvas.MAP_WIDTH, Canvas.MAP_HEIGHT);
 
     private static TILE_WIDTH: number = 16;
@@ -23,7 +23,7 @@ export abstract class Canvas {
     }
 
     public static drawTileSquare(pos: Position, color: string) {
-
+ 
         // x and y should be one based
         var boardX = ((pos.X-1) * Canvas.TILE_WIDTH) +1;
         var boardY = ((pos.Y-1) * Canvas.TILE_HEIGHT) +1;

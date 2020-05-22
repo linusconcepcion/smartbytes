@@ -8,9 +8,9 @@ export enum GameKey {
 
 export enum Direction {
     UP,
+    RIGHT,
     DOWN,
-    LEFT,
-    RIGHT
+    LEFT
 }
 
 export enum CellType {

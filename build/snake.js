@@ -6,7 +6,9 @@ let Snake = /** @class */ (() => {
     class Snake {
         constructor(game, headX, headY, length, direction, color, brain) {
             this.eat_countdown = Snake.max_moves_to_eat;
+            this.score = 0;
             this.steps = 0;
+            this.turns = 0;
             this.apples = 0;
             // construct the snake on backwards
             var pos = new Position(headX, headY);
@@ -78,6 +80,8 @@ let Snake = /** @class */ (() => {
                 this.is_dead = true;
                 return false;
             }
+            if (this.head.direction != direction)
+                this.turns++;
             // create a new head, and remove the old tail
             var segment = this.head;
             var pos = Position.copy(segment.position);
@@ -133,20 +137,31 @@ let Snake = /** @class */ (() => {
             }
             return false;
         }
-        calculate_score() {
+        /*
+        public calculate_score() {
             var cellsvisited = 0;
-            for (var x = 0; x < Canvas.MAP_WIDTH; x++) {
-                for (var y = 0; y < Canvas.MAP_HEIGHT; y++) {
+            for (var x=0; x<Canvas.MAP_WIDTH; x++) {
+                for (var y=0; y<Canvas.MAP_HEIGHT; y++) {
                     if (this.visited[x][y])
                         cellsvisited++;
                 }
             }
-            var efficiency = Snake.max_moves_to_eat - (this.steps / (this.apples + 1));
-            //this.score = (this.apples * 5000) + (efficiency * 100) + (cellsvisited * 10) + this.steps;
+    
+            var efficiency = Snake.max_moves_to_eat - (this.steps / (this.apples+1));
+            this.score = (this.apples * 5000) + (efficiency * 100) + (cellsvisited * 10) + this.steps;
+    
             //this.score = cellsvisited + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * cellsvisited), 1.3));
-            this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * this.steps), 1.3));
+            //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * this.steps), 1.3));
             //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) + (cellsvisited * 10);
             //this.score = (Math.pow(2, this.apples) * 5000) + (cellsvisited * 5) + this.steps;
+            return this.score;
+        }
+        */
+        calculate_score() {
+            if (this.apples < 10)
+                this.score = Math.floor(this.turns * this.turns) + Math.pow(2, this.apples);
+            else
+                this.score = Math.floor(this.turns * this.turns) * Math.pow(2, 10) * (this.apples - 9);
             return this.score;
         }
         draw() {
@@ -157,7 +172,7 @@ let Snake = /** @class */ (() => {
             }
         }
     }
-    Snake.max_moves_to_eat = 500;
+    Snake.max_moves_to_eat = 250;
     return Snake;
 })();
 export { Snake };

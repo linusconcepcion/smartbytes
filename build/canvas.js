@@ -41,8 +41,8 @@ let Canvas = /** @class */ (() => {
             Canvas.context.stroke();
         }
     }
-    Canvas.MAP_WIDTH = 15;
-    Canvas.MAP_HEIGHT = 15;
+    Canvas.MAP_WIDTH = 40;
+    Canvas.MAP_HEIGHT = 40;
     Canvas.DIAGONAL = Math.min(Canvas.MAP_WIDTH, Canvas.MAP_HEIGHT);
     Canvas.TILE_WIDTH = 16;
     Canvas.TILE_HEIGHT = 16;

@@ -4,6 +4,7 @@ export class NodeLayer {
 
     public prior_layer: NodeLayer;
     public node_count: number;
+    public real_node_count: number;
 
     private brain: Brain;
     private start_index: number;
@@ -12,8 +13,13 @@ export class NodeLayer {
     constructor(priorLayer: NodeLayer, nodeCount: number) {
         this.prior_layer = priorLayer;
         this.node_count = nodeCount;
+        this.real_node_count = nodeCount;
 
-        this.values = new Array<number>(nodeCount);
+        if (this.prior_layer!=null)
+            this.real_node_count = nodeCount + 1;  // add the bias
+
+        this.values = new Array<number>(this.real_node_count); 
+        this.values[nodeCount] = 1; 
     }
 
     public set_weights(brain: Brain, startpos: number) {
@@ -38,12 +44,14 @@ export class NodeLayer {
 
         for (var i=0; i<this.node_count; i++) {
             var total = 0.0;
-            for (var n=0; n<this.prior_layer.node_count; n++) {
-                total += this.brain.get_connecting_weight(this.start_index, this.prior_layer.node_count, i, n) * this.prior_layer.values[n];
+            for (var n=0; n<this.prior_layer.real_node_count; n++) {
+                total += this.brain.get_connecting_weight(this.start_index, this.prior_layer.real_node_count, i, n) * this.prior_layer.values[n];
             }
 
             this.values[i] = this.rectified_linear_units(total);
         }
+
+        this.values[this.node_count] = 1; // set the bias node
     }
 
     private rectified_linear_units(total: number) {
@@ -56,5 +64,10 @@ export class NodeLayer {
     private sigmoid(total: number) {
         var sig = 1/(1+Math.pow(Math.E, -total));
         return sig;
+    }
+
+    private swish(total: number) {
+        var swish = total / (1+Math.pow(Math.E, -total));
+        return swish;
     }
 }

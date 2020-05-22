@@ -51,7 +51,7 @@ export class Snake implements IDrawable
         brain.set_snake(this);
     }
 
-    private static max_moves_to_eat: number = 500;
+    private static max_moves_to_eat: number = 250;
     private eat_countdown: number = Snake.max_moves_to_eat;
 
     public brain: Brain;
@@ -62,10 +62,11 @@ export class Snake implements IDrawable
     public length: number;
 
     public is_dead: boolean;
-    public score: number; 
+    public score: number = 0; 
     public mating_pct: number;
 
     private steps: number = 0;
+    private turns: number = 0;
     private apples: number = 0;
     private visited: Array<Array<boolean>>;
 
@@ -113,6 +114,9 @@ export class Snake implements IDrawable
             this.is_dead = true;
             return false;
         }
+
+        if (this.head.direction!=direction)
+            this.turns++;
 
         // create a new head, and remove the old tail
         var segment = this.head;
@@ -175,6 +179,7 @@ export class Snake implements IDrawable
         return false;
     }
 
+    /*
     public calculate_score() {
         var cellsvisited = 0;
         for (var x=0; x<Canvas.MAP_WIDTH; x++) {
@@ -185,12 +190,22 @@ export class Snake implements IDrawable
         }
 
         var efficiency = Snake.max_moves_to_eat - (this.steps / (this.apples+1));
-        //this.score = (this.apples * 5000) + (efficiency * 100) + (cellsvisited * 10) + this.steps;
+        this.score = (this.apples * 5000) + (efficiency * 100) + (cellsvisited * 10) + this.steps;
 
         //this.score = cellsvisited + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * cellsvisited), 1.3));
-        this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * this.steps), 1.3));
+        //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * this.steps), 1.3));
         //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) + (cellsvisited * 10);
         //this.score = (Math.pow(2, this.apples) * 5000) + (cellsvisited * 5) + this.steps;
+        return this.score;
+    }
+    */
+
+    public calculate_score() {
+        if (this.apples < 10) 
+            this.score = Math.floor(this.turns * this.turns) + Math.pow(2, this.apples);
+        else
+            this.score = Math.floor(this.turns * this.turns) * Math.pow(2, 10) * (this.apples-9);
+
         return this.score;
     }
 

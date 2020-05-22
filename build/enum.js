@@ -9,9 +9,9 @@ export var GameKey;
 export var Direction;
 (function (Direction) {
     Direction[Direction["UP"] = 0] = "UP";
-    Direction[Direction["DOWN"] = 1] = "DOWN";
-    Direction[Direction["LEFT"] = 2] = "LEFT";
-    Direction[Direction["RIGHT"] = 3] = "RIGHT";
+    Direction[Direction["RIGHT"] = 1] = "RIGHT";
+    Direction[Direction["DOWN"] = 2] = "DOWN";
+    Direction[Direction["LEFT"] = 3] = "LEFT";
 })(Direction || (Direction = {}));
 export var CellType;
 (function (CellType) {

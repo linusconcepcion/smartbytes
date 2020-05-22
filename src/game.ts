@@ -8,7 +8,7 @@ import { Brain } from "./ai/brain.js";
 
 export class Game {
 
-    private static appleCount: number = 1;
+    private static appleCount: number = 8 ;
     public apples: Apple[];
 
     private speed: Speed = Speed.NORMAL;
@@ -21,7 +21,7 @@ export class Game {
     public init() {
         Canvas.init(<HTMLCanvasElement>document.querySelector("canvas"));
 
-        this.start_training(100);
+        this.start_training(2000);
     }
 
     private on_key_up(ev: KeyboardEvent) {
@@ -89,7 +89,7 @@ export class Game {
 
     private spawn_snake(lastgen: Array<Snake>) {
         var spawnrandom = Math.floor(Math.random() * 10) == 1;  // 10% of snakes will be random spawns
-        var smarty = Math.floor(Math.random() * 50) == 1;
+        var smarty = false; //Math.floor(Math.random() * 25) == 1;
 
         var brain = new Brain(this);
         if (lastgen==null && smarty) {
@@ -171,7 +171,7 @@ export class Game {
             if (this.speed==Speed.FAST)
                 ms = 1;
             else if (this.speed==Speed.SLOW)
-                ms = 50;
+                ms = 65;
 
             if (ms>0)
                 await this.sleep(ms);
