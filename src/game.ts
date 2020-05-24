@@ -27,8 +27,8 @@ export class Game {
         if (ev.keyCode==GameKey.SPACEBAR) {
             switch (this.speed) {
                 case Speed.NORMAL: this.speed = Speed.PAUSED; break;
-                //case Speed.SLOW: this.speed = Speed.PAUSED; break;
-                //case Speed.PAUSED: this.speed = Speed.FAST; break;
+                case Speed.SLOW: this.speed = Speed.PAUSED; break;
+                case Speed.PAUSED: this.speed = Speed.FAST; break;
                 default:
                     this.speed = Speed.NORMAL;
             }
@@ -63,14 +63,18 @@ export class Game {
             }
 
             if (best_length > best_overall_length)
+            {
                 best_overall_length = best_length;
+                this.speed = Speed.NORMAL;
+            }
+            else
+                this.speed = Speed.FAST;
             
             if (best_snake.fitness > best_overall_score) {
                 best_overall_score = best_snake.fitness;
                 best_overall_snake = best_snake;
             }
 
-            document.querySelector("#best_length").textContent = best_length.toString();
             document.querySelector("#best_overall_length").textContent = best_overall_length.toString();
             document.querySelector("#best_overall_snake").textContent = best_overall_snake.name;
             (<HTMLInputElement>document.querySelector("#best_weights")).value = JSON.stringify(best_overall_snake.brain.weights);
@@ -82,7 +86,7 @@ export class Game {
 
     private train_generation(generation: number, last_gen: Array<Snake>, best_snake: Snake)
     {
-        document.querySelector("#generation_num").textContent = generation.toString() + " in Training";
+        document.querySelector("#generation_num").textContent = generation.toString();
 
         var total_score = 0;
         if (last_gen!=null) {
@@ -111,9 +115,7 @@ export class Game {
 
     private async replay_best_snake(generation: number, best_snake: Snake) 
     {
-        document.querySelector("#generation_num").textContent = generation.toString() + " Champion";
-        document.querySelector("#best_score").textContent = best_snake.fitness.toString();
-
+        document.querySelector("#generation_num").textContent = generation.toString();
         await this.replay_game(best_snake);
 
         console.log("replay steps: " + best_snake.steps);
@@ -178,11 +180,17 @@ export class Game {
         this.snake = best_snake;
         this.snake.prepare(true);
 
+        var length = 0;
         while (!this.snake.is_dead) {
             if (this.speed!=Speed.PAUSED)
             {
                 var direction = this.snake.think();
                 this.do_move(direction, true);
+
+                if (length!=this.snake.length) {
+                    length = this.snake.length;
+                    document.querySelector("#current_length").textContent = length.toString();
+                }
             }
 
             var ms = 55;
