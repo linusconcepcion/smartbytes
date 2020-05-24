@@ -10,16 +10,18 @@ export class NodeLayer {
     private start_index: number;
     public values = new Array<number>();
 
-    constructor(priorLayer: NodeLayer, nodeCount: number) {
+    constructor(priorLayer: NodeLayer, nodeCount: number, isOutput: boolean) {
         this.prior_layer = priorLayer;
         this.node_count = nodeCount;
         this.real_node_count = nodeCount;
 
-        if (this.prior_layer!=null)
+        if (!isOutput)
             this.real_node_count = nodeCount + 1;  // add the bias
 
         this.values = new Array<number>(this.real_node_count); 
-        this.values[nodeCount] = 1; 
+
+        if (!isOutput)
+            this.values[nodeCount] = 1; 
     }
 
     public set_weights(brain: Brain, startpos: number) {

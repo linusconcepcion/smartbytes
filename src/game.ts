@@ -1,27 +1,26 @@
 import { Canvas } from "./canvas.js";
 import { Snake } from "./snake.js";
 import { Direction, GameKey, Speed } from "./enum.js";
-import { Clock } from "./clock.js";
 import { Apple } from "./apple.js";
 import { Position } from "./position.js";
 import { Brain } from "./ai/brain.js";
 
 export class Game {
 
-    private static appleCount: number = 8 ;
-    public apples: Apple[];
+    public static apples_on_board: number = 8;
+    private static generation_size: number = 2000;
+    private static max_generation: number = 1000;
 
     private speed: Speed = Speed.NORMAL;
     private snake: Snake;
-    private clock: Clock;
-    private has_moved: boolean = false;
-
-    private best_snake: Snake;
 
     public init() {
         Canvas.init(<HTMLCanvasElement>document.querySelector("canvas"));
 
-        this.start_training(2000);
+        let body: HTMLBodyElement = document.querySelector("body");
+        body.onkeyup = this.on_key_up.bind(this);
+
+        this.go();
     }
 
     private on_key_up(ev: KeyboardEvent) {
@@ -38,60 +37,82 @@ export class Game {
         }
     }
 
-    private async start_training(snakeCount: number) {
+    private async go() {
         var generation = 1;
 
-        let body: HTMLBodyElement = document.querySelector("body");
-        body.onkeyup = this.on_key_up.bind(this);
-        
-        var lastgen: Array<Snake> = null;
-        while (generation < 10000) {
-            document.querySelector("#generation_num").textContent = generation.toString();
+        var last_gen: Array<Snake> = null;
 
-            var bestlength = 0;
-            var bestscore = 0;
+        var best_snake: Snake = null;
+        var best_overall_length: number = 0;
 
-            var newgen = new Array<Snake>();
-            for (var i=0; i<snakeCount; i++) {
-                document.querySelector("#snake_num").textContent = (i+1).toString() + " of " + snakeCount.toString();
+        while (generation <= Game.max_generation) {
 
-                var newsnake = this.spawn_snake(lastgen);
-                newgen.push(newsnake);
+            last_gen = this.train_generation(generation, last_gen, best_snake);
 
-                await this.play_game(newsnake);
+            var sorted = last_gen.sort(function(a,b) { return b.score - a.score });
+            best_snake = sorted[0];
 
-                var score = newsnake.calculate_score();
-                var length = newsnake.length;
-
-                if (length>bestlength) {
-                    bestlength = length;
-                    document.querySelector("#best_length").textContent = bestlength.toString();
-                }
-
-                if (score>bestscore) {
-                    bestscore = score;
-                    document.querySelector("#best_score").textContent = bestscore.toString();
-                }
-
-                if (this.best_snake==null || score>this.best_snake.score) {
-                    this.best_snake = newsnake;
-                    document.querySelector("#best_overall_score").textContent = newsnake.length.toString();
-                    (<HTMLInputElement>document.querySelector("#best_weights")).value = JSON.stringify(newsnake.brain.weights);
-                }
+            // find the best length
+            var best_length = 0;
+            for (var i in last_gen) {
+                if (last_gen[i].length > best_length)
+                    best_length = last_gen[i].length;
             }
 
-            lastgen = this.top_half(newgen);
-            this.set_mating_pct(lastgen);
+            if (best_length > best_overall_length)
+                best_overall_length = best_length;
 
+            document.querySelector("#best_length").textContent = best_length.toString();
+            document.querySelector("#best_overall_length").textContent = best_overall_length.toString();
+            (<HTMLInputElement>document.querySelector("#best_weights")).value = JSON.stringify(best_snake.brain.weights);
+
+            await this.replay_best_snake(generation, best_snake);
             generation++;
         }
     }
 
-    private spawn_snake(lastgen: Array<Snake>) {
+    private train_generation(generation: number, last_gen: Array<Snake>, best_snake: Snake)
+    {
+        document.querySelector("#generation_num").textContent = generation.toString() + " in Training";
+
+        var total_score = 0;
+        if (last_gen!=null) {
+            for (var snake of last_gen)
+                total_score += snake.score;
+        }
+
+        var new_gen = new Array<Snake>();
+        for (var i=0; i<Game.generation_size; i++) {
+
+            var new_snake: Snake = null;
+            if (i==0 && best_snake!=null)
+                new_snake = best_snake;
+            else
+                new_snake = this.spawn_snake(last_gen, total_score);
+            
+            new_gen.push(new_snake);
+            new_snake.index = new_gen.length;
+
+            this.simulate_game(new_snake);
+            var score = new_snake.calculate_score();
+        }
+
+        return new_gen;
+    }
+
+    private async replay_best_snake(generation: number, best_snake: Snake) 
+    {
+        document.querySelector("#generation_num").textContent = generation.toString() + " Champion";
+        document.querySelector("#best_score").textContent = best_snake.score.toString();
+
+        await this.replay_game(best_snake);
+    }
+
+    private spawn_snake(lastgen: Array<Snake>, total_score: number) {
         var spawnrandom = Math.floor(Math.random() * 10) == 1;  // 10% of snakes will be random spawns
         var smarty = false; //Math.floor(Math.random() * 25) == 1;
 
-        var brain = new Brain(this);
+        var brain = new Brain();
         if (lastgen==null && smarty) {
             brain.spawn_smarty();
         } 
@@ -99,10 +120,11 @@ export class Game {
             brain.randomize();
         }
         else {
-            this.spawn_from(brain, lastgen);
+            this.spawn_from(brain, lastgen, total_score);
         }
 
-        return new Snake(this, Math.floor(Canvas.MAP_WIDTH/2)+1, Math.floor(Canvas.MAP_HEIGHT/2), 4, Direction.RIGHT, "#e3691c", brain);        
+        var new_snake = new Snake(brain, "#e3691c");        
+        return new_snake;
     }
 
     private sleep(ms) {
@@ -119,21 +141,12 @@ export class Game {
         return strong;
     }
 
-    private set_mating_pct(generation: Array<Snake>) {
-        var total = 0.0;
-        for (var snake of generation)
-            total += snake.score;
-
-        for (var snake of generation)
-            snake.mating_pct = (snake.score / total) * 100;
-    }
-
-    private spawn_from(brain: Brain, generation: Array<Snake>) {
-        var mom = this.natural_selection(generation);
+    private spawn_from(brain: Brain, generation: Array<Snake>, total_score: number) {
+        var mom = this.natural_selection(generation, total_score);
         
         var shouldmate = Math.floor(Math.random() * 2) == 1;
         if (shouldmate) {
-            var pop = this.natural_selection(generation);
+            var pop = this.natural_selection(generation, total_score);
 
             brain.cross_over(mom.brain, pop.brain);
         }
@@ -142,91 +155,60 @@ export class Game {
         }
     }
 
-    private natural_selection(generation: Array<Snake>) {
-        var rnd = Math.random() * 100;
+    private natural_selection(generation: Array<Snake>, total_score: number) {
+        var rnd = Math.random() * total_score;
         var total = 0.0;
         for (var snake of generation) {
-            total += snake.mating_pct;
+            total += snake.score;
             if (total > rnd)
                 return snake;
         }
         return generation[generation.length-1];  // just return the last snake
     }
 
-    private async play_game(newsnake: Snake) {
-        this.snake = newsnake;
-        this.apples = [];
+    private simulate_game(new_snake: Snake) {
 
-        for (var i=0; i<Game.appleCount; i++)
-            this.spawn_apple();
+        this.snake = new_snake;
+        this.snake.prepare(false);
 
-        while (!newsnake.is_dead) {
+        while (!this.snake.is_dead) {
+            var direction = this.snake.think();
+            this.do_move(direction, false);
+        }
+    }
+
+    private async replay_game(best_snake: Snake) {
+        this.snake = best_snake;
+        this.snake.prepare(true);
+
+        while (!this.snake.is_dead) {
             if (this.speed!=Speed.PAUSED)
             {
                 var direction = this.snake.think();
-                this.do_move(direction);
+                this.do_move(direction, true);
             }
 
-            var ms = 30;
+            var ms = 40;
             if (this.speed==Speed.FAST)
                 ms = 1;
             else if (this.speed==Speed.SLOW)
-                ms = 65;
+                ms = 75;
 
-            if (ms>0)
-                await this.sleep(ms);
+            await this.sleep(ms);
         }
     }
 
-    private spawn_apple() {
-        while (true) {
-            var x = Math.round((Math.random() * (Canvas.MAP_WIDTH-1))) + 1;
-            var y = Math.round((Math.random() * (Canvas.MAP_HEIGHT-1))) + 1;
-
-            var trypos = new Position(x,y);
-            if (!this.snake.is_on_tile(trypos) && this.is_apple_on_tile(trypos)==-1) {
-                this.apples.push(new Apple(trypos));
-                break;
-            }
-        }
-    }
-
-    private is_apple_on_tile(pos: Position) {
-        return this.is_apple_on_tile_xy(pos.X, pos.Y);
-    }
-
-    public is_apple_on_tile_xy(x: number, y: number) {
-        for (var i=0; i<this.apples.length; i++) {
-            if (this.apples[i].position.X == x && this.apples[i].position.Y == y) {
-                return i;
-            }
-        }
-        return -1;
-    }
-
-    private do_move(direction: Direction) {
+    private do_move(direction: Direction, draw: boolean) {
 
         this.snake.move(direction);
-        if (this.snake.is_dead) {
-            if (this.clock!=null) this.clock.stop();
+        if (this.snake.is_dead)
             return;
+
+        if (draw)
+        {
+            Canvas.clear();
+            this.snake.draw();
         }
-
-        var appleindex = this.is_apple_on_tile(this.snake.head.position);
-        if (appleindex != -1) {
-            this.apples.splice(appleindex, 1);  // remove one item
-            this.snake.eat();
-
-            this.spawn_apple(); // add a new apple
-        }
-
-        Canvas.clear();
-        for (var apple of this.apples)
-            apple.draw();
-
-        this.snake.draw();
-
-        this.has_moved = true;
     }
 }
 

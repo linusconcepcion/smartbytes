@@ -1,13 +1,14 @@
 export class NodeLayer {
-    constructor(priorLayer, nodeCount) {
+    constructor(priorLayer, nodeCount, isOutput) {
         this.values = new Array();
         this.prior_layer = priorLayer;
         this.node_count = nodeCount;
         this.real_node_count = nodeCount;
-        if (this.prior_layer != null)
+        if (!isOutput)
             this.real_node_count = nodeCount + 1; // add the bias
         this.values = new Array(this.real_node_count);
-        this.values[nodeCount] = 1;
+        if (!isOutput)
+            this.values[nodeCount] = 1;
     }
     set_weights(brain, startpos) {
         this.brain = brain;

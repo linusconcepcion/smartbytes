@@ -9,17 +9,15 @@ import { Smarties } from './saves.js';
 export class Brain {
 
     private snake: Snake;
-    private game: Game;
     private layers: NodeLayer[];
     public weights: number[];
 
-    constructor(game: Game) {
-        this.game = game;
+    constructor() {
 
-        var inputs = new NodeLayer(null, 24);
-        var hidden1 = new NodeLayer(inputs, 18);
-        var hidden2 = new NodeLayer(hidden1, 18);
-        var output = new NodeLayer(hidden2, 4);
+        var inputs = new NodeLayer(null, 24, false);
+        var hidden1 = new NodeLayer(inputs, 18, false);
+        var hidden2 = new NodeLayer(hidden1, 18, false);
+        var output = new NodeLayer(hidden2, 4, true);
 
         this.layers = [inputs, hidden1, hidden2, output];
         this.init_dna();
@@ -120,20 +118,6 @@ export class Brain {
             inputs.push(scan[2]);
         }
 
-        /*var hdir = this.direction_to_input(this.snake.head.direction);
-        inputs.push(hdir[0]);
-        inputs.push(hdir[1]);
-        inputs.push(hdir[2]);
-        inputs.push(hdir[3]);
-
-        var tdir = this.direction_to_input(this.snake.tail.direction);
-        inputs.push(tdir[0]);
-        inputs.push(tdir[1]);
-        inputs.push(tdir[2]);
-        inputs.push(tdir[3]);
-
-        inputs.push(hunger); */
-
         this.layers[0].set_inputs(inputs);
 
         for (var i=1; i<this.layers.length; i++)
@@ -183,7 +167,7 @@ export class Brain {
             if (result[0]==0 && this.snake.is_on_tile_xy(x, y))
                 result[0] = 1;
             
-            else if (result[1]==0 && this.game.is_apple_on_tile_xy(x, y)!=-1)
+            else if (result[1]==0 && this.snake.is_apple_on_tile_xy(x, y)!=null)
                 result[1] = 1;
         }
         result[2] = 1/(count+1);
@@ -217,7 +201,7 @@ export class Brain {
             if (result[0]==0 && this.snake.is_on_tile_xy(x, y))
                 return -signal;
             
-            else if (result[1]==0 && this.game.is_apple_on_tile_xy(x, y)!=-1)
+            else if (result[1]==0 && this.snake.is_apple_on_tile_xy(x, y)!=null)
                 return signal;
         }
         return -signal;
