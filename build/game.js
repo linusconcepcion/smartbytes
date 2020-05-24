@@ -44,12 +44,15 @@ let Game = /** @class */ (() => {
             return __awaiter(this, void 0, void 0, function* () {
                 var generation = 1;
                 var last_gen = null;
-                var best_snake = null;
                 var best_overall_length = 0;
+                var best_overall_score = 0;
+                var best_overall_snake = null;
+                var best_snake = null;
                 while (generation <= Game.max_generation) {
                     last_gen = this.train_generation(generation, last_gen, best_snake);
                     var sorted = last_gen.sort(function (a, b) { return b.score - a.score; });
                     best_snake = sorted[0];
+                    console.log("generation" + generation + ": " + best_snake.score);
                     // find the best length
                     var best_length = 0;
                     for (var i in last_gen) {
@@ -58,9 +61,14 @@ let Game = /** @class */ (() => {
                     }
                     if (best_length > best_overall_length)
                         best_overall_length = best_length;
+                    if (best_snake.score > best_overall_score) {
+                        best_overall_score = best_snake.score;
+                        best_overall_snake = best_snake;
+                    }
                     document.querySelector("#best_length").textContent = best_length.toString();
                     document.querySelector("#best_overall_length").textContent = best_overall_length.toString();
-                    document.querySelector("#best_weights").value = JSON.stringify(best_snake.brain.weights);
+                    document.querySelector("#best_overall_snake").textContent = best_overall_snake.name;
+                    document.querySelector("#best_weights").value = JSON.stringify(best_overall_snake.brain.weights);
                     yield this.replay_best_snake(generation, best_snake);
                     generation++;
                 }
@@ -79,11 +87,10 @@ let Game = /** @class */ (() => {
                 if (i == 0 && best_snake != null)
                     new_snake = best_snake;
                 else
-                    new_snake = this.spawn_snake(last_gen, total_score);
+                    new_snake = this.spawn_snake(generation, new_gen.length + 1, last_gen, total_score);
                 new_gen.push(new_snake);
-                new_snake.index = new_gen.length;
                 this.simulate_game(new_snake);
-                var score = new_snake.calculate_score();
+                new_snake.calculate_score();
             }
             return new_gen;
         }
@@ -94,7 +101,7 @@ let Game = /** @class */ (() => {
                 yield this.replay_game(best_snake);
             });
         }
-        spawn_snake(lastgen, total_score) {
+        spawn_snake(generation, index, lastgen, total_score) {
             var spawnrandom = Math.floor(Math.random() * 10) == 1; // 10% of snakes will be random spawns
             var smarty = false; //Math.floor(Math.random() * 25) == 1;
             var brain = new Brain();
@@ -107,7 +114,7 @@ let Game = /** @class */ (() => {
             else {
                 this.spawn_from(brain, lastgen, total_score);
             }
-            var new_snake = new Snake(brain, "#e3691c");
+            var new_snake = new Snake(generation, index, brain, "#e3691c");
             return new_snake;
         }
         sleep(ms) {

@@ -42,8 +42,11 @@ export class Game {
 
         var last_gen: Array<Snake> = null;
 
-        var best_snake: Snake = null;
         var best_overall_length: number = 0;
+        var best_overall_score: number = 0;
+        var best_overall_snake: Snake = null;
+
+        var best_snake: Snake = null;
 
         while (generation <= Game.max_generation) {
 
@@ -51,6 +54,8 @@ export class Game {
 
             var sorted = last_gen.sort(function(a,b) { return b.score - a.score });
             best_snake = sorted[0];
+
+            console.log("generation" + generation + ": " + best_snake.score);
 
             // find the best length
             var best_length = 0;
@@ -61,10 +66,16 @@ export class Game {
 
             if (best_length > best_overall_length)
                 best_overall_length = best_length;
+            
+            if (best_snake.score > best_overall_score) {
+                best_overall_score = best_snake.score;
+                best_overall_snake = best_snake;
+            }
 
             document.querySelector("#best_length").textContent = best_length.toString();
             document.querySelector("#best_overall_length").textContent = best_overall_length.toString();
-            (<HTMLInputElement>document.querySelector("#best_weights")).value = JSON.stringify(best_snake.brain.weights);
+            document.querySelector("#best_overall_snake").textContent = best_overall_snake.name;
+            (<HTMLInputElement>document.querySelector("#best_weights")).value = JSON.stringify(best_overall_snake.brain.weights);
 
             await this.replay_best_snake(generation, best_snake);
             generation++;
@@ -88,13 +99,12 @@ export class Game {
             if (i==0 && best_snake!=null)
                 new_snake = best_snake;
             else
-                new_snake = this.spawn_snake(last_gen, total_score);
+                new_snake = this.spawn_snake(generation, new_gen.length+1, last_gen, total_score);
             
             new_gen.push(new_snake);
-            new_snake.index = new_gen.length;
 
             this.simulate_game(new_snake);
-            var score = new_snake.calculate_score();
+            new_snake.calculate_score();
         }
 
         return new_gen;
@@ -108,7 +118,7 @@ export class Game {
         await this.replay_game(best_snake);
     }
 
-    private spawn_snake(lastgen: Array<Snake>, total_score: number) {
+    private spawn_snake(generation: number, index: number, lastgen: Array<Snake>, total_score: number) {
         var spawnrandom = Math.floor(Math.random() * 10) == 1;  // 10% of snakes will be random spawns
         var smarty = false; //Math.floor(Math.random() * 25) == 1;
 
@@ -123,7 +133,7 @@ export class Game {
             this.spawn_from(brain, lastgen, total_score);
         }
 
-        var new_snake = new Snake(brain, "#e3691c");        
+        var new_snake = new Snake(generation, index, brain, "#e3691c");        
         return new_snake;
     }
 

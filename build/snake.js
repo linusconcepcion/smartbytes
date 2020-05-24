@@ -6,11 +6,14 @@ import { Game } from "./game.js";
 import { Apple } from "./apple.js";
 let Snake = /** @class */ (() => {
     class Snake {
-        constructor(brain, color) {
+        constructor(generation, index, brain, color) {
             this.eat_countdown = Snake.max_moves_to_eat;
             this.score = 0;
             this.steps = 0;
             this.turns = 0;
+            this.generation = generation,
+                this.index = index,
+                this.name = "G" + generation + "." + index;
             this.color = color;
             this.brain = brain;
             brain.set_snake(this);

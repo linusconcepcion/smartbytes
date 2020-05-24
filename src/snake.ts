@@ -10,9 +10,15 @@ import { Apple } from "./apple.js";
 export class Snake implements IDrawable
 {
     constructor(
+        generation: number,
+        index: number,
         brain: Brain,
         color: string
     ) {
+
+        this.generation = generation,
+        this.index = index,
+        this.name = "G" + generation + "." + index;
 
         this.color = color;
         this.brain = brain;
@@ -24,11 +30,14 @@ export class Snake implements IDrawable
 
     public brain: Brain;
 
+    public index: number;
+    public generation: number;
+    public name: string;
+
     public color: string;
     public head: SnakeSegment;
     public tail: SnakeSegment;
     public length: number;
-    public index: number;
 
     public is_dead: boolean;
     public score: number = 0; 
