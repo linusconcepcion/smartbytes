@@ -75,11 +75,12 @@ export class Game {
                 best_overall_snake = best_snake;
             }
 
+            await this.replay_best_snake(generation, best_snake);
+
             document.querySelector("#best_overall_length").textContent = best_overall_length.toString();
             document.querySelector("#best_overall_snake").textContent = best_overall_snake.name;
             (<HTMLInputElement>document.querySelector("#best_weights")).value = JSON.stringify(best_overall_snake.brain.weights);
 
-            await this.replay_best_snake(generation, best_snake);
             generation++;
         }
     }
