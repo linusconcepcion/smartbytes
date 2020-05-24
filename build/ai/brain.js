@@ -1,7 +1,6 @@
 import { NodeLayer } from './nodeLayer.js';
 import { Direction } from '../enum.js';
 import { Canvas } from '../canvas.js';
-import { Smarties } from './saves.js';
 export class Brain {
     constructor() {
         var inputs = new NodeLayer(null, 24, false);
@@ -30,12 +29,6 @@ export class Brain {
     set_snake(snake) {
         this.snake = snake;
     }
-    spawn_smarty() {
-        var rnd = Math.floor(Math.random() * Smarties.smart_snakes.length);
-        for (var i = 0; i < this.weights.length; i++)
-            this.weights[i] = Smarties.smart_snakes[rnd][i];
-        this.mutate();
-    }
     clone(parent) {
         for (var i = 0; i < this.weights.length; i++) {
             this.weights[i] = parent.weights[i];
@@ -43,7 +36,7 @@ export class Brain {
         this.mutate();
     }
     cross_over(mom, pop) {
-        var splicecount = 5;
+        var splicecount = 1;
         var splicepoints = [];
         while (splicepoints.length < splicecount) {
             var point = Math.floor((Math.random() * this.weights.length - 1)) + 1;

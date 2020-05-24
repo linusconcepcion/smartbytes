@@ -55,7 +55,7 @@ export class Game {
             var sorted = last_gen.sort(function(a,b) { return b.score - a.score });
             best_snake = sorted[0];
 
-            console.log("generation" + generation + ": " + best_snake.score);
+            console.log("training steps: " + best_snake.steps);
 
             // find the best length
             var best_length = 0;
@@ -116,17 +116,15 @@ export class Game {
         document.querySelector("#best_score").textContent = best_snake.score.toString();
 
         await this.replay_game(best_snake);
+
+        console.log("replay steps: " + best_snake.steps);
     }
 
     private spawn_snake(generation: number, index: number, lastgen: Array<Snake>, total_score: number) {
-        var spawnrandom = Math.floor(Math.random() * 10) == 1;  // 10% of snakes will be random spawns
-        var smarty = false; //Math.floor(Math.random() * 25) == 1;
-
+        var spawnrandom = Math.floor(Math.random() * 50) == 1;  
+        
         var brain = new Brain();
-        if (lastgen==null && smarty) {
-            brain.spawn_smarty();
-        } 
-        else if (lastgen==null || spawnrandom) {
+        if (lastgen==null || spawnrandom) {
             brain.randomize();
         }
         else {

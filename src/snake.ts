@@ -26,7 +26,7 @@ export class Snake implements IDrawable
     }
 
     private static max_moves_to_eat: number = 250;
-    private eat_countdown: number = Snake.max_moves_to_eat;
+    private eat_countdown: number;
 
     public brain: Brain;
 
@@ -42,7 +42,7 @@ export class Snake implements IDrawable
     public is_dead: boolean;
     public score: number = 0; 
 
-    private steps: number = 0;
+    public steps: number = 0;
     private turns: number = 0;
     private apples: Array<Apple>;
     private visited: Array<Array<boolean>>;
@@ -62,6 +62,7 @@ export class Snake implements IDrawable
         this.visited = null;
         this.set_position(Math.floor(Canvas.MAP_WIDTH/2)+1, Math.floor(Canvas.MAP_HEIGHT/2), 4, Direction.RIGHT);         
 
+        this.eat_countdown = Snake.max_moves_to_eat;
         this.is_dead = false;
         this.steps = 0;
         this.turns = 0;
@@ -127,7 +128,7 @@ export class Snake implements IDrawable
 
     public is_apple_on_tile_xy(x: number, y: number) {
         for (var i=0; i<this.apples.length; i++) {
-            if (!this.apples[i].is_visible)
+            if (!this.apples[i].is_visible())
                 continue;
 
             if (this.apples[i].position.X == x && this.apples[i].position.Y == y) {
@@ -182,7 +183,9 @@ export class Snake implements IDrawable
     }
 
     public move(direction: Direction) {
+        this.steps++;
         this.eat_countdown--;
+
         if (this.eat_countdown==0) {
             this.is_dead = true;
             return false;
@@ -238,7 +241,6 @@ export class Snake implements IDrawable
             this.spawn_apple(); // add a new apple
         }
 
-        this.steps++;
         return true;
     }
 

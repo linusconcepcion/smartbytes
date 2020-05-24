@@ -7,7 +7,6 @@ import { Apple } from "./apple.js";
 let Snake = /** @class */ (() => {
     class Snake {
         constructor(generation, index, brain, color) {
-            this.eat_countdown = Snake.max_moves_to_eat;
             this.score = 0;
             this.steps = 0;
             this.turns = 0;
@@ -29,6 +28,7 @@ let Snake = /** @class */ (() => {
             }
             this.visited = null;
             this.set_position(Math.floor(Canvas.MAP_WIDTH / 2) + 1, Math.floor(Canvas.MAP_HEIGHT / 2), 4, Direction.RIGHT);
+            this.eat_countdown = Snake.max_moves_to_eat;
             this.is_dead = false;
             this.steps = 0;
             this.turns = 0;
@@ -89,7 +89,7 @@ let Snake = /** @class */ (() => {
         }
         is_apple_on_tile_xy(x, y) {
             for (var i = 0; i < this.apples.length; i++) {
-                if (!this.apples[i].is_visible)
+                if (!this.apples[i].is_visible())
                     continue;
                 if (this.apples[i].position.X == x && this.apples[i].position.Y == y) {
                     return this.apples[i];
@@ -135,6 +135,7 @@ let Snake = /** @class */ (() => {
             this.eat_countdown = Snake.max_moves_to_eat;
         }
         move(direction) {
+            this.steps++;
             this.eat_countdown--;
             if (this.eat_countdown == 0) {
                 this.is_dead = true;
@@ -187,7 +188,6 @@ let Snake = /** @class */ (() => {
                 this.eat(apple);
                 this.spawn_apple(); // add a new apple
             }
-            this.steps++;
             return true;
         }
         is_on_tile(pos) {

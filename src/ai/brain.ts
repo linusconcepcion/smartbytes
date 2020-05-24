@@ -4,7 +4,6 @@ import { NodeLayer } from './nodeLayer.js'
 import { Position } from '../position.js';
 import { Direction } from '../enum.js';
 import { Canvas } from '../canvas.js';
-import { Smarties } from './saves.js';
 
 export class Brain {
 
@@ -47,14 +46,6 @@ export class Brain {
         this.snake = snake;
     }
 
-    public spawn_smarty() {
-        var rnd = Math.floor(Math.random() * Smarties.smart_snakes.length);
-        for (var i=0; i<this.weights.length; i++)
-            this.weights[i] = Smarties.smart_snakes[rnd][i];
-
-        this.mutate();
-    }
-
     public clone(parent: Brain) {
         
         for (var i=0; i<this.weights.length; i++) {
@@ -65,7 +56,7 @@ export class Brain {
     }
 
     public cross_over(mom: Brain, pop: Brain) {
-        var splicecount = 5;
+        var splicecount = 1;
         var splicepoints = [];
         while (splicepoints.length<splicecount) {
             var point = Math.floor((Math.random() * this.weights.length-1))+1;
