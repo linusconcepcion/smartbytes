@@ -20,6 +20,6 @@ export class Apple implements IDrawable {
         if (!this.is_visible())
             return;
 
-        Canvas.drawTileCircle(this.position, "#FF0000");
+        Canvas.draw_tile_circle(this.position, "#FF0000");
     }
 }

@@ -25,8 +25,19 @@ export class Snake implements IDrawable
         brain.set_snake(this);
     }
 
-    private static max_moves_to_eat: number = 250;
-    private eat_countdown: number;
+    public clone() {
+        var newbrain = new Brain();
+        newbrain.clone(this.brain, false);
+
+        return new Snake(
+            this.generation,
+            this.index,
+            newbrain,
+            this.color
+        );
+    }
+
+    private life_left: number = 200;
 
     public brain: Brain;
 
@@ -40,7 +51,7 @@ export class Snake implements IDrawable
     public length: number;
 
     public is_dead: boolean;
-    public score: number = 0; 
+    public fitness: number = 0; 
 
     public steps: number = 0;
     private turns: number = 0;
@@ -48,8 +59,11 @@ export class Snake implements IDrawable
     private visited: Array<Array<boolean>>;
 
     public prepare(is_replay: boolean) {
-        if (!is_replay)
+        if (!is_replay) 
+        {
             this.apples = new Array<Apple>();
+            this.fitness = 0;
+        }
         else
         {
             for (var a of this.apples)
@@ -60,13 +74,12 @@ export class Snake implements IDrawable
         }
 
         this.visited = null;
-        this.set_position(Math.floor(Canvas.MAP_WIDTH/2)+1, Math.floor(Canvas.MAP_HEIGHT/2), 4, Direction.RIGHT);         
+        this.set_position(Math.floor(Canvas.MAP_WIDTH/2)+1, Math.floor(Canvas.MAP_HEIGHT/2), 3, Direction.RIGHT);         
 
-        this.eat_countdown = Snake.max_moves_to_eat;
+        this.life_left = 200;
         this.is_dead = false;
         this.steps = 0;
         this.turns = 0;
-        this.score = 0;
 
         for (var i=0; i<Game.apples_on_board; i++)
             this.spawn_apple();
@@ -139,16 +152,12 @@ export class Snake implements IDrawable
     }
 
     public think() {
-        var hunger = (Snake.max_moves_to_eat - this.eat_countdown) / Snake.max_moves_to_eat;
-        var dir = this.brain.process(hunger);
-        return dir;
+        var dir = this.brain.process();
 
-        /*
         if (this.is_reverse(dir, this.head.direction))
             return this.head.direction;  // can't turn on a dime.
         else
             return dir;
-        */
     }
 
     private visit(pos: Position) {
@@ -165,28 +174,29 @@ export class Snake implements IDrawable
         this.visited[pos.X-1][pos.Y-1] = true;
     }
 
-    /*
     private is_reverse(dir1: Direction, dir2: Direction) {
-        
+        return false;
+
         return (dir1==Direction.UP && dir2==Direction.DOWN) ||
                (dir2==Direction.UP && dir1==Direction.DOWN) ||
                (dir1==Direction.LEFT && dir2==Direction.RIGHT) ||
                (dir2==Direction.LEFT && dir1==Direction.RIGHT);
     }
-    */
 
     public eat(apple: Apple) {
         apple.eaten = true;
         this.length += 1;
 
-        this.eat_countdown = Snake.max_moves_to_eat;
+        this.life_left += 100;
+        if (this.life_left > 500)
+            this.life_left = 500;
     }
 
     public move(direction: Direction) {
         this.steps++;
-        this.eat_countdown--;
+        this.life_left--;
 
-        if (this.eat_countdown==0) {
+        if (this.life_left==0) {
             this.is_dead = true;
             return false;
         }
@@ -260,7 +270,7 @@ export class Snake implements IDrawable
         return false;
     }
 
-    public calculate_score() {
+    public calculate_fitness() {
         var cells_visited = 0;
         for (var x=0; x<Canvas.MAP_WIDTH; x++) {
             for (var y=0; y<Canvas.MAP_HEIGHT; y++) {
@@ -274,24 +284,27 @@ export class Snake implements IDrawable
             if (a.eaten)
                 apple_count++;
         }
-        var efficiency = Snake.max_moves_to_eat - (this.steps / (apple_count + 1));
-        this.score = (apple_count * 5000) + (efficiency * 100) + (cells_visited * 10) + this.turns;
+        var efficiency = (apple_count / this.steps);
+        this.fitness = (apple_count * 5000) + (efficiency * 500) + (cells_visited * 10) + this.turns;
 
         //this.score = cellsvisited + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * cellsvisited), 1.3));
-        //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * this.steps), 1.3));
-        //this.score = this.steps + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) + (cellsvisited * 10);
-        //this.score = (Math.pow(2, this.apples) * 5000) + (cellsvisited * 5) + this.steps;
-        return this.score;
+        //this.fitness = this.steps + (Math.pow(2, apple_count) + (Math.pow(apple_count, 2.1) * 500)) - (Math.pow(apple_count, 1.2) * Math.pow((0.25 * this.steps), 1.3));
     }
     
     /*
-    public calculate_score() {
-        if (this.apples < 10) 
-            this.score = Math.floor(this.turns * this.turns) + Math.pow(2, this.apples);
-        else
-            this.score = Math.floor(this.turns * this.turns) * Math.pow(2, 10) * (this.apples-9);
+    public calculate_fitness() {
+        var apple_count = 0;
+        for (var a of this.apples) {
+            if (a.eaten)
+                apple_count++;
+        }
 
-        return this.score;
+        var score = apple_count + 3;
+
+        if (score < 10) 
+            this.fitness = Math.floor(this.steps * this.steps) + Math.pow(2, score);
+        else
+            this.fitness = Math.floor(this.steps * this.steps) * Math.pow(2, 10) * (score-9);
     }
     */
 

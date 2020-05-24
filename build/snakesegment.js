@@ -8,6 +8,6 @@ export class SnakeSegment {
         this.tail = null;
     }
     draw() {
-        Canvas.drawTileSquare(this.position, this.snake.color);
+        Canvas.draw_tile_square(this.position, this.snake.color);
     }
 }

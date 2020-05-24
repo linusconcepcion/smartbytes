@@ -25,6 +25,6 @@ export class SnakeSegment implements IDrawable {
 
     public draw() 
     {
-        Canvas.drawTileSquare(this.position, this.snake.color)
+        Canvas.draw_tile_square(this.position, this.snake.color)
     }
 }

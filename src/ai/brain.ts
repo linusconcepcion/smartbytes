@@ -46,17 +46,18 @@ export class Brain {
         this.snake = snake;
     }
 
-    public clone(parent: Brain) {
+    public clone(parent: Brain, mutate: boolean) {
         
         for (var i=0; i<this.weights.length; i++) {
             this.weights[i] = parent.weights[i];
         }
 
-        this.mutate();
+        if (mutate)
+            this.mutate();
     }
 
     public cross_over(mom: Brain, pop: Brain) {
-        var splicecount = 1;
+        var splicecount = 3;
         var splicepoints = [];
         while (splicepoints.length<splicecount) {
             var point = Math.floor((Math.random() * this.weights.length-1))+1;
@@ -89,14 +90,22 @@ export class Brain {
         for (var i=0; i<this.weights.length; i++) {
             var shouldMutate = (Math.floor(Math.random() * 20))==1;
             if (shouldMutate) {
-                this.weights[i] = (Math.random() * 2)-1;
+                //this.weights[i] = (Math.random() * 2)-1;
+
+                this.weights[i] += (Math.random() / 5);
+                if (this.weights[i] > 1)
+                    this.weights[i] = 1;
+                else if (this.weights[i] < -1)
+                    this.weights[i] = -1; 
             }
         }
     }
 
-    public process(hunger: number) {
+    public process() {
         var headpos = this.snake.head.position;
         var inputs = [];
+
+        Canvas.clear_sight_lines();
         
         var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]; 
         for (var d in directions) {
@@ -142,6 +151,8 @@ export class Brain {
         var y = head.Y;
         var count = 0;
 
+        var vision_color = "#555";
+
         var max = 0;
         if (dy==0)
             max = Canvas.MAP_WIDTH;
@@ -156,12 +167,21 @@ export class Brain {
             count++;
 
             if (result[0]==0 && this.snake.is_on_tile_xy(x, y))
-                result[0] = 1;
+            {
+                vision_color = "#F55";
+                result[0] = 1/count;
+            }
             
             else if (result[1]==0 && this.snake.is_apple_on_tile_xy(x, y)!=null)
+            {
+                vision_color = "#5F5";
                 result[1] = 1;
+            }
+
+            if (x>0 && y>0 && x<=Canvas.MAP_WIDTH && y<=Canvas.MAP_HEIGHT)
+                Canvas.draw_sight_line(x, y, vision_color);
         }
-        result[2] = 1/(count+1);
+        result[2] = 1/count;
 
         return result;
     }
