@@ -13,7 +13,7 @@ export class Brain {
 
     constructor() {
 
-        var inputs = new NodeLayer(null, 30, false);
+        var inputs = new NodeLayer(null, 28, false);
         var hidden1 = new NodeLayer(inputs, 18, false);
         var hidden2 = new NodeLayer(hidden1, 18, false);
         var output = new NodeLayer(hidden2, 4, true);
@@ -119,15 +119,18 @@ export class Brain {
             inputs.push(scan[2]);
         }
 
+        /*
         var head_dir = this.direction_to_input(this.snake.head.direction);
         inputs.push(head_dir[0]);
         inputs.push(head_dir[1]);
         inputs.push(head_dir[2]);
         inputs.push(head_dir[3]);
+        */
 
-        var marco_polo = this.marco_polo(this.snake.head.position, this.snake.head.direction);
-        inputs.push(marco_polo[1]);
-        inputs.push(marco_polo[0]);
+        inputs.push(this.marco_polo(this.snake.head.position, Direction.UP));
+        inputs.push(this.marco_polo(this.snake.head.position, Direction.RIGHT));
+        inputs.push(this.marco_polo(this.snake.head.position, Direction.DOWN));
+        inputs.push(this.marco_polo(this.snake.head.position, Direction.LEFT));
 
         this.layers[0].set_inputs(inputs);
 
@@ -168,11 +171,11 @@ export class Brain {
 
         var next_distance = this.snake.calc_distance_to_apple(next_pos);
         if (cur_distance < next_distance)
-            return [1, 0];
+            return -1;
         else if (cur_distance > next_distance)
-            return [0, 1];
+            return 1;
         else
-            return [0, 0];
+            return 0;
     }
 
 
