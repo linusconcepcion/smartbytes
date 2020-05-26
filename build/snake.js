@@ -104,6 +104,19 @@ export class Snake {
         }
         return null;
     }
+    calc_distance_to_apple(head) {
+        var closest = 1000000; // arbitrarily large number
+        for (var apple of this.apples) {
+            if (!apple.is_visible())
+                continue;
+            var dx = head.X - apple.position.X;
+            var dy = head.Y - apple.position.Y;
+            var distance = Math.sqrt(Math.pow(dx, 2) + Math.pow(dy, 2));
+            if (distance < closest)
+                closest = distance;
+        }
+        return distance;
+    }
     think() {
         var dir = this.brain.process();
         if (this.is_reverse(dir, this.head.direction))

@@ -1,9 +1,10 @@
 import { NodeLayer } from './nodeLayer.js';
+import { Position } from '../position.js';
 import { Direction } from '../enum.js';
 import { Canvas } from '../canvas.js';
 export class Brain {
     constructor() {
-        var inputs = new NodeLayer(null, 24, false);
+        var inputs = new NodeLayer(null, 30, false);
         var hidden1 = new NodeLayer(inputs, 18, false);
         var hidden2 = new NodeLayer(hidden1, 18, false);
         var output = new NodeLayer(hidden2, 4, true);
@@ -84,9 +85,18 @@ export class Brain {
             var scan = this.scan_direction(headpos, direction[0], direction[1]);
             //inputs.push(scan);
             inputs.push(scan[0]);
-            inputs.push(scan[1]);
+            //inputs.push(scan[1]);
+            inputs.push(0);
             inputs.push(scan[2]);
         }
+        var head_dir = this.direction_to_input(this.snake.head.direction);
+        inputs.push(head_dir[0]);
+        inputs.push(head_dir[1]);
+        inputs.push(head_dir[2]);
+        inputs.push(head_dir[3]);
+        var marco_polo = this.marco_polo(this.snake.head.position, this.snake.head.direction);
+        inputs.push(marco_polo[1]);
+        inputs.push(marco_polo[0]);
         this.layers[0].set_inputs(inputs);
         for (var i = 1; i < this.layers.length; i++)
             this.layers[i].calculate_nodes();
@@ -108,19 +118,37 @@ export class Brain {
         }
         return curdir;
     }
+    marco_polo(head, direction) {
+        var cur_distance = this.snake.calc_distance_to_apple(head);
+        var next_pos = Position.copy(head);
+        switch (direction) {
+            case Direction.UP:
+                next_pos.Y -= 1;
+                break;
+            case Direction.DOWN:
+                next_pos.Y += 1;
+                break;
+            case Direction.LEFT:
+                next_pos.X -= 1;
+                break;
+            case Direction.RIGHT:
+                next_pos.X += 1;
+                break;
+        }
+        var next_distance = this.snake.calc_distance_to_apple(next_pos);
+        if (cur_distance < next_distance)
+            return [1, 0];
+        else if (cur_distance > next_distance)
+            return [0, 1];
+        else
+            return [0, 0];
+    }
     scan_direction(head, dx, dy) {
         var result = [0, 0, 0]; // snake, apple, wall
         var x = head.X;
         var y = head.Y;
         var count = 0;
         var vision_color = "#555";
-        var max = 0;
-        if (dy == 0)
-            max = Canvas.MAP_WIDTH;
-        else if (dx == 0)
-            max = Canvas.MAP_HEIGHT;
-        else
-            max = Canvas.DIAGONAL;
         while (x > 0 && y > 0 && x <= Canvas.MAP_WIDTH && y <= Canvas.MAP_HEIGHT) {
             x = x + dx;
             y = y + dy;
@@ -138,31 +166,6 @@ export class Brain {
         }
         result[2] = 1 / count;
         return result;
-    }
-    scan_direction2(head, dx, dy) {
-        var result = [0, 0, 0]; // snake, apple, wall
-        var x = head.X;
-        var y = head.Y;
-        var count = 0;
-        var max = 0;
-        if (dy == 0)
-            max = Canvas.MAP_WIDTH;
-        else if (dx == 0)
-            max = Canvas.MAP_HEIGHT;
-        else
-            max = Canvas.DIAGONAL;
-        var signal = 0.0;
-        while (x > 0 && y > 0 && x <= Canvas.MAP_WIDTH && y <= Canvas.MAP_HEIGHT) {
-            x = x + dx;
-            y = y + dy;
-            count++;
-            signal = (max - (count - 1)) / max;
-            if (result[0] == 0 && this.snake.is_on_tile_xy(x, y))
-                return -signal;
-            else if (result[1] == 0 && this.snake.is_apple_on_tile_xy(x, y) != null)
-                return signal;
-        }
-        return -signal;
     }
     direction_to_input(direction) {
         switch (direction) {

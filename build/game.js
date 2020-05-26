@@ -14,6 +14,7 @@ import { Brain } from "./ai/brain.js";
 let Game = /** @class */ (() => {
     class Game {
         constructor() {
+            this.best_overall_length = 0;
             this.speed = Speed.NORMAL;
         }
         init() {
@@ -29,12 +30,8 @@ let Game = /** @class */ (() => {
                     case Speed.NORMAL:
                         this.speed = Speed.PAUSED;
                         break;
-                    case Speed.SLOW:
-                        this.speed = Speed.PAUSED;
-                        break;
-                    case Speed.PAUSED:
-                        this.speed = Speed.FAST;
-                        break;
+                    //case Speed.SLOW: this.speed = Speed.PAUSED; break;
+                    //case Speed.PAUSED: this.speed = Speed.FAST; break;
                     default:
                         this.speed = Speed.NORMAL;
                 }
@@ -44,7 +41,6 @@ let Game = /** @class */ (() => {
             return __awaiter(this, void 0, void 0, function* () {
                 var generation = 1;
                 var last_gen = null;
-                var best_overall_length = 0;
                 var best_overall_score = 0;
                 var best_overall_snake = null;
                 var best_snake = null;
@@ -59,18 +55,15 @@ let Game = /** @class */ (() => {
                         if (last_gen[i].length > best_length)
                             best_length = last_gen[i].length;
                     }
-                    if (best_length > best_overall_length) {
-                        best_overall_length = best_length;
-                        this.speed = Speed.NORMAL;
-                    }
-                    else
-                        this.speed = Speed.FAST;
+                    var new_champion = (best_length > this.best_overall_length);
                     if (best_snake.fitness > best_overall_score) {
                         best_overall_score = best_snake.fitness;
                         best_overall_snake = best_snake;
                     }
-                    yield this.replay_best_snake(generation, best_snake);
-                    document.querySelector("#best_overall_length").textContent = best_overall_length.toString();
+                    yield this.replay_best_snake(generation, best_snake, new_champion);
+                    if (new_champion)
+                        this.best_overall_length = best_length;
+                    document.querySelector("#best_overall_length").textContent = this.best_overall_length.toString();
                     document.querySelector("#best_overall_snake").textContent = best_overall_snake.name;
                     document.querySelector("#best_weights").value = JSON.stringify(best_overall_snake.brain.weights);
                     generation++;
@@ -98,10 +91,13 @@ let Game = /** @class */ (() => {
             }
             return new_gen;
         }
-        replay_best_snake(generation, best_snake) {
+        replay_best_snake(generation, best_snake, new_champion) {
             return __awaiter(this, void 0, void 0, function* () {
-                document.querySelector("#generation_num").textContent = generation.toString();
-                yield this.replay_game(best_snake);
+                if (new_champion)
+                    document.querySelector("#generation_num").textContent = generation.toString() + " NEW CHAMPION!";
+                else
+                    document.querySelector("#generation_num").textContent = generation.toString();
+                yield this.replay_game(best_snake, new_champion);
                 console.log("replay steps: " + best_snake.steps);
             });
         }
@@ -121,20 +117,24 @@ let Game = /** @class */ (() => {
             return new Promise(resolve => setTimeout(resolve, ms));
         }
         spawn_from(brain, generation, total_score) {
-            var mom = this.natural_selection(generation, total_score);
+            var mom = this.natural_selection(generation, total_score, null);
             var shouldmate = Math.floor(Math.random() * 2) == 1;
             if (shouldmate) {
-                var pop = this.natural_selection(generation, total_score);
+                var pop = this.natural_selection(generation, total_score, mom);
                 brain.cross_over(mom.brain, pop.brain);
             }
             else {
                 brain.clone(mom.brain, true);
             }
         }
-        natural_selection(generation, total_score) {
+        natural_selection(generation, total_score, mom) {
+            if (mom != null)
+                total_score -= mom.fitness;
             var rnd = Math.random() * total_score;
             var total = 0.0;
             for (var snake of generation) {
+                if (mom != null && snake == mom)
+                    continue;
                 total += snake.fitness;
                 if (total > rnd)
                     return snake;
@@ -149,7 +149,7 @@ let Game = /** @class */ (() => {
                 this.do_move(direction, false);
             }
         }
-        replay_game(best_snake) {
+        replay_game(best_snake, new_champion) {
             return __awaiter(this, void 0, void 0, function* () {
                 this.snake = best_snake;
                 this.snake.prepare(true);
@@ -168,6 +168,12 @@ let Game = /** @class */ (() => {
                         ms = 1;
                     else if (this.speed == Speed.SLOW)
                         ms = 100;
+                    else if (this.speed == Speed.NORMAL) {
+                        if (this.snake.length < this.best_overall_length || !new_champion)
+                            ms = 1;
+                        else
+                            ms = 55;
+                    }
                     yield this.sleep(ms);
                 }
             });
@@ -184,7 +190,7 @@ let Game = /** @class */ (() => {
         }
     }
     Game.apples_on_board = 1;
-    Game.generation_size = 2000;
+    Game.generation_size = 3000;
     Game.max_generation = 1000;
     return Game;
 })();

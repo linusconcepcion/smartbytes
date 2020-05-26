@@ -6,8 +6,10 @@ import { Brain } from "./ai/brain.js";
 export class Game {
 
     public static apples_on_board: number = 1;
-    private static generation_size: number = 2000;
+    private static generation_size: number = 3000;
     private static max_generation: number = 1000;
+
+    private best_overall_length: number = 0;
 
     private speed: Speed = Speed.NORMAL;
     private snake: Snake;
@@ -27,8 +29,8 @@ export class Game {
         if (ev.keyCode==GameKey.SPACEBAR) {
             switch (this.speed) {
                 case Speed.NORMAL: this.speed = Speed.PAUSED; break;
-                case Speed.SLOW: this.speed = Speed.PAUSED; break;
-                case Speed.PAUSED: this.speed = Speed.FAST; break;
+                //case Speed.SLOW: this.speed = Speed.PAUSED; break;
+                //case Speed.PAUSED: this.speed = Speed.FAST; break;
                 default:
                     this.speed = Speed.NORMAL;
             }
@@ -40,7 +42,6 @@ export class Game {
 
         var last_gen: Array<Snake> = null;
 
-        var best_overall_length: number = 0;
         var best_overall_score: number = 0;
         var best_overall_snake: Snake = null;
 
@@ -62,22 +63,18 @@ export class Game {
                     best_length = last_gen[i].length;
             }
 
-            if (best_length > best_overall_length)
-            {
-                best_overall_length = best_length;
-                this.speed = Speed.NORMAL;
-            }
-            else
-                this.speed = Speed.FAST;
-            
+            var new_champion = (best_length > this.best_overall_length);
             if (best_snake.fitness > best_overall_score) {
                 best_overall_score = best_snake.fitness;
                 best_overall_snake = best_snake;
             }
 
-            await this.replay_best_snake(generation, best_snake);
+            await this.replay_best_snake(generation, best_snake, new_champion);
 
-            document.querySelector("#best_overall_length").textContent = best_overall_length.toString();
+            if (new_champion)
+                this.best_overall_length = best_length;
+
+            document.querySelector("#best_overall_length").textContent = this.best_overall_length.toString();
             document.querySelector("#best_overall_snake").textContent = best_overall_snake.name;
             (<HTMLInputElement>document.querySelector("#best_weights")).value = JSON.stringify(best_overall_snake.brain.weights);
 
@@ -114,10 +111,14 @@ export class Game {
         return new_gen;
     }
 
-    private async replay_best_snake(generation: number, best_snake: Snake) 
+    private async replay_best_snake(generation: number, best_snake: Snake, new_champion: boolean) 
     {
-        document.querySelector("#generation_num").textContent = generation.toString();
-        await this.replay_game(best_snake);
+        if (new_champion)
+            document.querySelector("#generation_num").textContent = generation.toString() + " NEW CHAMPION!";
+        else
+            document.querySelector("#generation_num").textContent = generation.toString();
+
+        await this.replay_game(best_snake, new_champion);
 
         console.log("replay steps: " + best_snake.steps);
     }
@@ -142,11 +143,11 @@ export class Game {
     }
 
     private spawn_from(brain: Brain, generation: Array<Snake>, total_score: number) {
-        var mom = this.natural_selection(generation, total_score);
+        var mom = this.natural_selection(generation, total_score, null);
         
         var shouldmate = Math.floor(Math.random() * 2) == 1;
         if (shouldmate) {
-            var pop = this.natural_selection(generation, total_score);
+            var pop = this.natural_selection(generation, total_score, mom);
 
             brain.cross_over(mom.brain, pop.brain);
         }
@@ -155,10 +156,16 @@ export class Game {
         }
     }
 
-    private natural_selection(generation: Array<Snake>, total_score: number) {
+    private natural_selection(generation: Array<Snake>, total_score: number, mom: Snake) {
+        if (mom!=null)
+            total_score -= mom.fitness;
+
         var rnd = Math.random() * total_score;
         var total = 0.0;
         for (var snake of generation) {
+            if (mom!=null && snake==mom)
+                continue;
+
             total += snake.fitness;
             if (total > rnd)
                 return snake;
@@ -177,7 +184,7 @@ export class Game {
         }
     }
 
-    private async replay_game(best_snake: Snake) {
+    private async replay_game(best_snake: Snake, new_champion: boolean) {
         this.snake = best_snake;
         this.snake.prepare(true);
 
@@ -199,6 +206,13 @@ export class Game {
                 ms = 1;
             else if (this.speed==Speed.SLOW)
                 ms = 100;
+            else if (this.speed==Speed.NORMAL)
+            {
+                if (this.snake.length<this.best_overall_length || !new_champion)
+                    ms = 1;
+                else
+                    ms = 55;
+            }
 
             await this.sleep(ms);
         }
