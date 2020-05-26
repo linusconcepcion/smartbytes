@@ -11,9 +11,11 @@ import { Canvas } from "./canvas.js";
 import { Snake } from "./snake.js";
 import { GameKey, Speed } from "./enum.js";
 import { Brain } from "./ai/brain.js";
+import { Smarties } from "./smarties.js";
 let Game = /** @class */ (() => {
     class Game {
         constructor() {
+            this.smarty_index = 0;
             this.best_overall_length = 0;
             this.speed = Speed.NORMAL;
         }
@@ -103,8 +105,15 @@ let Game = /** @class */ (() => {
         }
         spawn_snake(generation, index, lastgen, total_score) {
             var spawnrandom = Math.floor(Math.random() * 50) == 1;
+            var smarty = Math.floor(Math.random() * 250) == 1;
             var brain = new Brain();
-            if (lastgen == null || spawnrandom) {
+            if (smarty) {
+                brain.weights = Smarties.snakes[this.smarty_index];
+                this.smarty_index++;
+                if (this.smarty_index >= Smarties.snakes.length)
+                    this.smarty_index = 0;
+            }
+            else if (lastgen == null || spawnrandom) {
                 brain.randomize();
             }
             else {

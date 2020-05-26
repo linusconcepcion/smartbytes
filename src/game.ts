@@ -2,6 +2,7 @@ import { Canvas } from "./canvas.js";
 import { Snake } from "./snake.js";
 import { Direction, GameKey, Speed } from "./enum.js";
 import { Brain } from "./ai/brain.js";
+import { Smarties } from "./smarties.js";
 
 export class Game {
 
@@ -9,6 +10,7 @@ export class Game {
     private static generation_size: number = 3000;
     private static max_generation: number = 1000;
 
+    private smarty_index = 0;
     private best_overall_length: number = 0;
 
     private speed: Speed = Speed.NORMAL;
@@ -125,9 +127,16 @@ export class Game {
 
     private spawn_snake(generation: number, index: number, lastgen: Array<Snake>, total_score: number) {
         var spawnrandom = Math.floor(Math.random() * 50) == 1;  
+        var smarty = Math.floor(Math.random() * 250) == 1;
         
         var brain = new Brain();
-        if (lastgen==null || spawnrandom) {
+        if (smarty) {
+            brain.weights = Smarties.snakes[this.smarty_index];
+            this.smarty_index++;
+            if (this.smarty_index >= Smarties.snakes.length)
+                this.smarty_index = 0;
+        }
+        else if (lastgen==null || spawnrandom) {
             brain.randomize();
         }
         else {
