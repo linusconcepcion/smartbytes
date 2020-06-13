@@ -288,6 +288,7 @@ export class Snake implements IDrawable
         return false;
     }
 
+    
     public calculate_fitness() {
         var cells_visited = 0;
         for (var x=0; x<Canvas.MAP_WIDTH; x++) {
@@ -302,11 +303,11 @@ export class Snake implements IDrawable
             if (a.eaten)
                 apple_count++;
         }
-        var efficiency = (apple_count / this.steps);
-        this.fitness = (apple_count * 5000) + (efficiency * 500) + (cells_visited * 10) + this.turns;
 
-        //this.score = cellsvisited + (Math.pow(2, this.apples) + (Math.pow(this.apples, 2.1) * 500)) - (Math.pow(this.apples, 1.2) * Math.pow((0.25 * cellsvisited), 1.3));
-        //this.fitness = this.steps + (Math.pow(2, apple_count) + (Math.pow(apple_count, 2.1) * 500)) - (Math.pow(apple_count, 1.2) * Math.pow((0.25 * this.steps), 1.3));
+        /*var efficiency = (apple_count / this.steps); 
+        this.fitness = (apple_count * 5000) + (efficiency * 500) + (cells_visited * 10) + this.turns; */
+
+        this.fitness = this.steps + (Math.pow(2, apple_count) + (Math.pow(apple_count, 2.1) * 500)) - (Math.pow(apple_count, 1.2) * Math.pow((0.25 * this.steps), 1.3));
     }
     
     /*

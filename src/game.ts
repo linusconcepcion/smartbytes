@@ -127,7 +127,7 @@ export class Game {
 
     private spawn_snake(generation: number, index: number, lastgen: Array<Snake>, total_score: number) {
         var spawnrandom = Math.floor(Math.random() * 50) == 1;  
-        var smarty = Math.floor(Math.random() * 250) == 1;
+        var smarty = false; //Math.floor(Math.random() * 250) == 1;
         
         var brain = new Brain();
         if (smarty) {

@@ -4,9 +4,9 @@ import { Direction } from '../enum.js';
 import { Canvas } from '../canvas.js';
 export class Brain {
     constructor() {
-        var inputs = new NodeLayer(null, 28, false);
-        var hidden1 = new NodeLayer(inputs, 18, false);
-        var hidden2 = new NodeLayer(hidden1, 18, false);
+        var inputs = new NodeLayer(null, 16, false);
+        var hidden1 = new NodeLayer(inputs, 36, false);
+        var hidden2 = new NodeLayer(hidden1, 36, false);
         var output = new NodeLayer(hidden2, 4, true);
         this.layers = [inputs, hidden1, hidden2, output];
         this.init_dna();
@@ -66,7 +66,6 @@ export class Brain {
         for (var i = 0; i < this.weights.length; i++) {
             var shouldMutate = (Math.floor(Math.random() * 20)) == 1;
             if (shouldMutate) {
-                //this.weights[i] = (Math.random() * 2)-1;
                 this.weights[i] += (Math.random() / 5);
                 if (this.weights[i] > 1)
                     this.weights[i] = 1;
@@ -79,7 +78,8 @@ export class Brain {
         var headpos = this.snake.head.position;
         var inputs = [];
         Canvas.clear_sight_lines();
-        var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
+        //var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]; 
+        var directions = [[0, -1], [1, 0], [0, -1], [-1, 0]];
         for (var d in directions) {
             var direction = directions[d];
             var scan = this.scan_direction(headpos, direction[0], direction[1]);
@@ -89,13 +89,6 @@ export class Brain {
             inputs.push(0);
             inputs.push(scan[2]);
         }
-        /*
-        var head_dir = this.direction_to_input(this.snake.head.direction);
-        inputs.push(head_dir[0]);
-        inputs.push(head_dir[1]);
-        inputs.push(head_dir[2]);
-        inputs.push(head_dir[3]);
-        */
         inputs.push(this.marco_polo(this.snake.head.position, Direction.UP));
         inputs.push(this.marco_polo(this.snake.head.position, Direction.RIGHT));
         inputs.push(this.marco_polo(this.snake.head.position, Direction.DOWN));
@@ -160,7 +153,7 @@ export class Brain {
                 vision_color = "#F55";
                 result[0] = 1 / count;
             }
-            else if (result[1] == 0 && this.snake.is_apple_on_tile_xy(x, y) != null) {
+            else if (result[1] == 0 && result[0] == 0 && this.snake.is_apple_on_tile_xy(x, y) != null) {
                 vision_color = "#5F5";
                 result[1] = 1;
             }

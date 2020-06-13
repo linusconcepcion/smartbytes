@@ -5,17 +5,13 @@
     "version": "0.2.0",
     "configurations": [
         {
-            "type": "node",
+            "type": "chrome",
             "request": "launch",
-            "name": "Launch Program",
-            "skipFiles": [
-                "<node_internals>/**"
-            ],
-            "program": "${workspaceFolder}\\src\\game.ts",
-            "preLaunchTask": "tsc: build - tsconfig.json",
-            "outFiles": [
-                "${workspaceFolder}/build/**/*.js"
-            ]
+            "name": "Launch localhost",
+            "runtimeExecutable": "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
+            "url": "http://localhost/smartbytes/index.html",
+            "webRoot": "${workspaceFolder}/src/index.html",
+            "preLaunchTask": "tsc: build - tsconfig.json"
         }
     ]
 }
