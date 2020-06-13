@@ -261,3 +261,4 @@ export class Snake {
             apple.draw();
     }
 }
+//# sourceMappingURL=snake.js.map

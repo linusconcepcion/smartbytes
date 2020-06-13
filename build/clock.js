@@ -25,3 +25,4 @@ export class Clock {
         this.is_paused = !this.is_paused;
     }
 }
+//# sourceMappingURL=clock.js.map

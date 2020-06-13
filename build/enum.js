@@ -25,3 +25,4 @@ export var Speed;
     Speed[Speed["SLOW"] = 2] = "SLOW";
     Speed[Speed["PAUSED"] = 3] = "PAUSED";
 })(Speed || (Speed = {}));
+//# sourceMappingURL=enum.js.map

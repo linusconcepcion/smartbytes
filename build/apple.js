@@ -15,3 +15,4 @@ export class Apple {
         Canvas.draw_tile_circle(this.position, "#FF0000");
     }
 }
+//# sourceMappingURL=apple.js.map

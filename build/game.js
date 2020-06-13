@@ -206,3 +206,4 @@ let Game = /** @class */ (() => {
 export { Game };
 var newgame = new Game();
 newgame.init();
+//# sourceMappingURL=game.js.map

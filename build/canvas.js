@@ -79,3 +79,4 @@ let Canvas = /** @class */ (() => {
     return Canvas;
 })();
 export { Canvas };
+//# sourceMappingURL=canvas.js.map

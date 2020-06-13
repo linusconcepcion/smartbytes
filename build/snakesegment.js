@@ -11,3 +11,4 @@ export class SnakeSegment {
         Canvas.draw_tile_square(this.position, this.snake.color);
     }
 }
+//# sourceMappingURL=snakesegment.js.map

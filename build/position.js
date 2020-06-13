@@ -10,3 +10,4 @@ export class Position {
         return this.X == pos.X && this.Y == pos.Y;
     }
 }
+//# sourceMappingURL=position.js.map

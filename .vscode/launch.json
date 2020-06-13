@@ -9,9 +9,9 @@
             "request": "launch",
             "name": "Launch localhost",
             "runtimeExecutable": "C:\\Program Files (x86)\\Google\\Chrome\\Application\\chrome.exe",
-            "url": "http://localhost/smartbytes/index.html",
-            "webRoot": "${workspaceFolder}/src/index.html",
-            "preLaunchTask": "tsc: build - tsconfig.json"
+            "url": "http://localhost/smartbytes",
+            "webRoot": "${workspaceFolder}",
+            "preLaunchTask": "tsc: build - tsconfig.json",
         }
     ]
 }
