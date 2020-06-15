@@ -107,7 +107,7 @@ let Game = /** @class */ (() => {
         }
         spawn_snake(generation, index, lastgen, total_score) {
             var spawnrandom = Math.floor(Math.random() * 50) == 1;
-            var smarty = false; //Math.floor(Math.random() * 250) == 1;
+            var smarty = Math.floor(Math.random() * 250) == 1;
             var brain = new Brain();
             if (smarty) {
                 brain.weights = Smarties.snakes[this.smarty_index];
