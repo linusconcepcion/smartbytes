@@ -4,6 +4,7 @@ import { NodeLayer } from './nodeLayer.js'
 import { Position } from '../position.js';
 import { Direction } from '../enum.js';
 import { Canvas } from '../canvas.js';
+import { Board } from '../board.js';
 
 export class Brain {
 
@@ -165,7 +166,7 @@ export class Brain {
         if (!(next_pos.X>0 && next_pos.Y>0 && next_pos.X<=Canvas.MAP_WIDTH && next_pos.Y<=Canvas.MAP_HEIGHT))
             return -1;
 
-        if (this.snake.is_on_tile_xy(next_pos.X, next_pos.Y))
+        if (Board.is_snake_on_tile(next_pos.X, next_pos.Y))
             return -1;
 
         return 0;
@@ -205,13 +206,13 @@ export class Brain {
             y = y + dy;
             count++;
 
-            if (result[0]==0 && this.snake.is_on_tile_xy(x, y))
+            if (result[0]==0 && Board.is_snake_on_tile(x, y))
             {
                 vision_color = "#F55";
                 result[0] = 1/count;
             }
             
-            else if (result[1]==0 && result[0]==0 && this.snake.is_apple_on_tile_xy(x, y)!=null)
+            else if (result[1]==0 && result[0]==0 && Board.is_apple_on_tile(x, y)!=null)
             {
                 vision_color = "#5F5";
                 result[1] = 1;

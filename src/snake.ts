@@ -6,6 +6,7 @@ import { Canvas } from "./canvas.js";
 import { Brain } from "./ai/brain.js";
 import { Game } from "./game.js";
 import { Apple } from "./apple.js";
+import { Board } from "./board.js";
 
 export class Snake implements IDrawable
 {
@@ -59,6 +60,8 @@ export class Snake implements IDrawable
     private visited: Array<Array<boolean>>;
 
     public prepare(is_replay: boolean) {
+        Board.clear();
+
         if (!is_replay) 
         {
             this.apples = new Array<Apple>();
@@ -118,6 +121,8 @@ export class Snake implements IDrawable
         for (var a of this.apples) {
             if (!a.played) {
                 a.played = true;
+
+                Board.set_apple(a.position.X, a.position.Y);
                 return;
             }
         }
@@ -128,18 +133,17 @@ export class Snake implements IDrawable
             var y = Math.round((Math.random() * (Canvas.MAP_HEIGHT-1))) + 1;
 
             var trypos = new Position(x,y);
-            if (!this.is_on_tile(trypos) && this.is_apple_on_tile(trypos)==null) {
+            if (!Board.is_snake_on_tile(trypos.X, trypos.Y) && !Board.is_apple_on_tile(trypos.X, trypos.Y)) {
                 this.apples.push(new Apple(trypos));
                 break;
             }
         }
     }
 
-    private is_apple_on_tile(pos: Position) {
-        return this.is_apple_on_tile_xy(pos.X, pos.Y);
-    }
+    public get_apple_on_tile(x: number, y: number) {
+        if (!Board.is_apple_on_tile(x, y))
+            return null;        
 
-    public is_apple_on_tile_xy(x: number, y: number) {
         for (var i=0; i<this.apples.length; i++) {
             if (!this.apples[i].is_visible())
                 continue;
@@ -203,6 +207,8 @@ export class Snake implements IDrawable
 
     public eat(apple: Apple) {
         apple.eaten = true;
+        Board.clear_apple_tile(apple.position.X, apple.position.Y);
+
         this.length += 1;
 
         this.life_left += 100;
@@ -259,33 +265,21 @@ export class Snake implements IDrawable
                 cursegment = cursegment.tail;
         }
 
+        if (cursegment.tail!=null) {
+            Board.clear_snake_tile(cursegment.tail.position.X, cursegment.tail.position.Y);
+        }
+
         cursegment.tail = null;
         this.tail = cursegment;
         this.visit(this.head.position);
 
-        var apple = this.is_apple_on_tile(this.head.position);
-        if (apple != null) {
+        var apple = this.get_apple_on_tile(this.head.position.X, this.head.position.Y);
+        if (apple!=null) {
             this.eat(apple);
             this.spawn_apple(); // add a new apple
         }
 
         return true;
-    }
-
-    public is_on_tile(pos: Position) {
-        return this.is_on_tile_xy(pos.X, pos.Y);
-    }
-
-    public is_on_tile_xy(x: number, y: number) {
-        var segment = this.head;
-        while (segment!=null) {
-            if (segment.position.X == x && segment.position.Y == y)
-                return true;
-
-            segment = segment.tail;
-        }
-
-        return false;
     }
 
 

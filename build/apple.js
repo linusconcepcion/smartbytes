@@ -1,10 +1,12 @@
 import { Position } from './position.js';
 import { Canvas } from './canvas.js';
+import { Board } from './board.js';
 export class Apple {
     constructor(pos) {
         this.eaten = false;
         this.played = true;
         this.position = Position.copy(pos);
+        Board.set_apple(pos.X, pos.Y);
     }
     is_visible() {
         return !this.eaten && this.played;
