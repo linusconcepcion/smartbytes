@@ -4,7 +4,7 @@ import { Direction } from '../enum.js';
 import { Canvas } from '../canvas.js';
 export class Brain {
     constructor() {
-        var inputs = new NodeLayer(null, 16, false);
+        var inputs = new NodeLayer(null, 13, false);
         var hidden1 = new NodeLayer(inputs, 36, false);
         var hidden2 = new NodeLayer(hidden1, 36, false);
         var output = new NodeLayer(hidden2, 4, true);
@@ -38,7 +38,7 @@ export class Brain {
             this.mutate();
     }
     cross_over(mom, pop) {
-        var splicecount = 3;
+        var splicecount = 4;
         var splicepoints = [];
         while (splicepoints.length < splicecount) {
             var point = Math.floor((Math.random() * this.weights.length - 1)) + 1;
@@ -66,7 +66,7 @@ export class Brain {
         for (var i = 0; i < this.weights.length; i++) {
             var shouldMutate = (Math.floor(Math.random() * 20)) == 1;
             if (shouldMutate) {
-                this.weights[i] += (Math.random() / 5);
+                this.weights[i] += (Math.random() / 4);
                 if (this.weights[i] > 1)
                     this.weights[i] = 1;
                 else if (this.weights[i] < -1)
@@ -78,21 +78,20 @@ export class Brain {
         var headpos = this.snake.head.position;
         var inputs = [];
         Canvas.clear_sight_lines();
-        //var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]]; 
+        var directions = [[0, -1], [1, -1], [1, 0], [1, 1], [0, 1], [-1, 1], [-1, 0], [-1, -1]];
         var directions = [[0, -1], [1, 0], [0, -1], [-1, 0]];
         for (var d in directions) {
             var direction = directions[d];
             var scan = this.scan_direction(headpos, direction[0], direction[1]);
-            //inputs.push(scan);
             inputs.push(scan[0]);
             //inputs.push(scan[1]);
-            inputs.push(0);
             inputs.push(scan[2]);
         }
         inputs.push(this.marco_polo(this.snake.head.position, Direction.UP));
         inputs.push(this.marco_polo(this.snake.head.position, Direction.RIGHT));
         inputs.push(this.marco_polo(this.snake.head.position, Direction.DOWN));
         inputs.push(this.marco_polo(this.snake.head.position, Direction.LEFT));
+        inputs.push(this.dead_if_straight(this.snake.head));
         this.layers[0].set_inputs(inputs);
         for (var i = 1; i < this.layers.length; i++)
             this.layers[i].calculate_nodes();
@@ -113,6 +112,28 @@ export class Brain {
             curdir = Direction.LEFT;
         }
         return curdir;
+    }
+    dead_if_straight(head) {
+        var next_pos = Position.copy(head.position);
+        switch (head.direction) {
+            case Direction.UP:
+                next_pos.Y -= 1;
+                break;
+            case Direction.DOWN:
+                next_pos.Y += 1;
+                break;
+            case Direction.LEFT:
+                next_pos.X -= 1;
+                break;
+            case Direction.RIGHT:
+                next_pos.X += 1;
+                break;
+        }
+        if (!(next_pos.X > 0 && next_pos.Y > 0 && next_pos.X <= Canvas.MAP_WIDTH && next_pos.Y <= Canvas.MAP_HEIGHT))
+            return -1;
+        if (this.snake.is_on_tile_xy(next_pos.X, next_pos.Y))
+            return -1;
+        return 0;
     }
     marco_polo(head, direction) {
         var cur_distance = this.snake.calc_distance_to_apple(head);

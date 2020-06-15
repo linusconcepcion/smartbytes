@@ -288,7 +288,8 @@ export class Snake implements IDrawable
         return false;
     }
 
-    
+
+    /*
     public calculate_fitness() {
         var cells_visited = 0;
         for (var x=0; x<Canvas.MAP_WIDTH; x++) {
@@ -304,13 +305,12 @@ export class Snake implements IDrawable
                 apple_count++;
         }
 
-        /*var efficiency = (apple_count / this.steps); 
-        this.fitness = (apple_count * 5000) + (efficiency * 500) + (cells_visited * 10) + this.turns; */
+        //var efficiency = (apple_count / this.steps); 
+        //this.fitness = (apple_count * 5000) + (efficiency * 500) + (cells_visited * 10) + this.turns; 
 
         this.fitness = this.steps + (Math.pow(2, apple_count) + (Math.pow(apple_count, 2.1) * 500)) - (Math.pow(apple_count, 1.2) * Math.pow((0.25 * this.steps), 1.3));
-    }
+    }*/
     
-    /*
     public calculate_fitness() {
         var apple_count = 0;
         for (var a of this.apples) {
@@ -325,8 +325,7 @@ export class Snake implements IDrawable
         else
             this.fitness = Math.floor(this.steps * this.steps) * Math.pow(2, 10) * (score-9);
     }
-    */
-
+    
     public draw() {
         var segment = this.head;
         while (segment!=null) {

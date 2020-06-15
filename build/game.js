@@ -47,7 +47,7 @@ let Game = /** @class */ (() => {
                 var best_overall_snake = null;
                 var best_snake = null;
                 while (generation <= Game.max_generation) {
-                    var new_gen = this.train_generation(generation, last_gen, best_snake);
+                    var new_gen = this.train_generation(generation, last_gen, best_overall_snake);
                     last_gen = new_gen.sort(function (a, b) { return b.fitness - a.fitness; });
                     best_snake = last_gen[0];
                     console.log("training steps: " + best_snake.steps);
@@ -62,12 +62,14 @@ let Game = /** @class */ (() => {
                         best_overall_score = best_snake.fitness;
                         best_overall_snake = best_snake;
                     }
-                    yield this.replay_best_snake(generation, best_snake, new_champion);
-                    if (new_champion)
+                    if (new_champion) {
+                        yield this.replay_best_snake(generation, best_snake, new_champion);
                         this.best_overall_length = best_length;
+                    }
                     document.querySelector("#best_overall_length").textContent = this.best_overall_length.toString();
                     document.querySelector("#best_overall_snake").textContent = best_overall_snake.name;
                     document.querySelector("#best_weights").value = JSON.stringify(best_overall_snake.brain.weights);
+                    yield this.sleep(10);
                     generation++;
                 }
             });
